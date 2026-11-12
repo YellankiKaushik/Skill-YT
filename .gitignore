@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+node_modules/
+coverage/
+/codex-video-to-project-skill-starter.zip
+/Skill-YT-recovery.bundle
