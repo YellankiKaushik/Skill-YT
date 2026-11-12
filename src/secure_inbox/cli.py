@@ -73,7 +73,7 @@ def main(argv=None) -> int:
         )
     client = GmailClient.from_oauth(settings.gmail_credentials_path, settings.gmail_token_path, settings.enable_label_mutation)
     client.ensure_labels()
-    agent = InboxAgent(client, OpenAICompatibleClassifier(settings), settings, Policy())
+    agent = InboxAgent(client, OpenAICompatibleClassifier(settings), settings, Policy.from_env())
     print(json.dumps({"outcomes": agent.run_once(), "continuous_polling": False}, indent=2))
     return 0
 

@@ -1,3 +1,6 @@
+import base64
+from email import message_from_bytes
+
 import pytest
 
 from secure_inbox.gmail_client import GmailClient
@@ -26,8 +29,13 @@ class Service:
 
 def test_draft_adapter_creates_only_draft():
     service = Service(); client = GmailClient(service)
-    assert client.create_draft(Draft("a@example.test", "Re: Hi", "Thanks"), "t1")["id"] == "draft-1"
+    draft = Draft("a@example.test", "Re: Hi", "Thanks", "<original@example.test>", "<older@example.test> <original@example.test>")
+    assert client.create_draft(draft, "t1")["id"] == "draft-1"
     assert service.user_adapter.drafts_adapter.body["message"]["threadId"] == "t1"
+    raw = service.user_adapter.drafts_adapter.body["message"]["raw"]
+    mime = message_from_bytes(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
+    assert mime["In-Reply-To"] == "<original@example.test>"
+    assert mime["References"] == "<older@example.test> <original@example.test>"
     with pytest.raises(AttributeError):
         client.send_email()
 

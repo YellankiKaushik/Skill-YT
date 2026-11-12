@@ -4,7 +4,12 @@ import logging
 
 from .drafting import create_reply
 from .models import Category, EmailMessage, Policy, WorkflowState
-from .security import DraftOnlyBoundary, deterministic_classification, has_prompt_injection
+from .security import (
+    DraftOnlyBoundary,
+    deterministic_classification,
+    has_prompt_injection,
+    offer_below_floor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +40,15 @@ class InboxAgent:
                 classification = self.classifier.classify(message)
                 if has_prompt_injection(message.body):
                     classification = deterministic_classification(message)
+                if classification.category == Category.SPONSORSHIP and (
+                    not self.policy.sponsorship_enabled
+                    or not self.policy.approved_terms.strip()
+                    or self.policy.minimum_price is None
+                    or offer_below_floor(message.body, self.policy.minimum_price)
+                ):
+                    self._transition(message.id, WorkflowState.NEEDS_REVIEW)
+                    outcomes.append((message.id, "needs_review"))
+                    continue
                 if classification.category in {Category.SUSPICIOUS, Category.REVIEW} or classification.requires_review:
                     self._transition(message.id, WorkflowState.NEEDS_REVIEW)
                     outcomes.append((message.id, "needs_review"))

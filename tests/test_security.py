@@ -3,6 +3,7 @@ from secure_inbox.security import (
     DraftOnlyBoundary,
     deterministic_classification,
     has_prompt_injection,
+    offer_below_floor,
     validate_public_http_url,
 )
 from secure_inbox.retry import retry_call
@@ -43,6 +44,12 @@ def test_private_and_metadata_urls_are_rejected():
     for url in ("http://127.0.0.1", "http://169.254.169.254/latest/meta-data", "http://localhost/x", "file:///etc/passwd"):
         assert not validate_public_http_url(url)
     assert validate_public_http_url("https://example.com/page")
+
+
+def test_configured_sponsorship_floor_detects_undercutting():
+    assert offer_below_floor("We can offer $500 for this campaign", 1000)
+    assert offer_below_floor("Our offer is USD 999.99", 1000)
+    assert not offer_below_floor("Our offer is $1,000", 1000)
 
 
 def test_retry_exhaustion_is_bounded():

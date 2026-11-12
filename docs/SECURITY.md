@@ -5,6 +5,7 @@
 - No sending operation, Gmail send endpoint, general Gmail service object, or destructive action is exposed to the agent-facing boundary.
 - `gmail.compose` and `gmail.modify` can authorize sending at Google's OAuth layer. The application boundary is defense in depth, not a Gmail-scope guarantee.
 - Incoming mail, attachments, quoted text, names, and URLs are untrusted data. Deterministic matching routes common prompt injection and credential phishing to review; these heuristics are not a complete classifier.
+- Sponsorship processing requires an explicit enable flag, approved terms, and a configured price floor. Detected currency offers below the floor route to review; humans still inspect every draft.
 - Human review is required before any real outbound email. The software never approves or sends its own drafts.
 - Logging records operation types and error classes, not message contents, tokens, OAuth credentials, or API keys.
 - A single worker and per-message idempotency state prevent duplicate work within one process. Labels are not distributed locks or exactly-once delivery. A draft created before a crash can be duplicated on retry.

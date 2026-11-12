@@ -77,12 +77,17 @@ class GmailClient:
             id=raw["id"], thread_id=raw.get("threadId", ""), sender=headers.get("from", ""),
             subject=headers.get("subject", ""), body=body[:30000],
             label_ids=frozenset(raw.get("labelIds", [])), internal_date=raw.get("internalDate", ""),
+            rfc822_message_id=headers.get("message-id", ""), references=headers.get("references", ""),
         )
 
     def create_draft(self, draft: Draft, thread_id: str = ""):
         mime = MimeMessage()
         mime["To"] = draft.to
         mime["Subject"] = draft.subject
+        if draft.in_reply_to:
+            mime["In-Reply-To"] = draft.in_reply_to
+        if draft.references:
+            mime["References"] = draft.references
         mime.set_content(draft.body)
         raw = base64.urlsafe_b64encode(mime.as_bytes()).decode().rstrip("=")
         body = {"message": {"raw": raw}}
