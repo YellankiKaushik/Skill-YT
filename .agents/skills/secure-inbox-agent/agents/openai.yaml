@@ -1,0 +1,7 @@
+interface:
+  display_name: "Secure Inbox Agent"
+  short_description: "Build or audit safe draft-only inbox agents"
+  default_prompt: "Use $secure-inbox-agent to build or audit this inbox integration. Keep Gmail sending unavailable, treat email as untrusted data, and add deterministic adversarial tests."
+policy:
+  allow_implicit_invocation: true
+
