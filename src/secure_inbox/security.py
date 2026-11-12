@@ -22,6 +22,7 @@ SUSPICIOUS_PATTERNS = (
     r"send.{0,30}(password|api key|token)",
 )
 _URL_RE = re.compile(r"https?://[^\s<>\]\[\"']+", re.IGNORECASE)
+_CURRENCY_RE = re.compile(r"(?:\$\s*|USD\s*\$?\s*)([0-9][0-9,]*(?:\.[0-9]{1,2})?)", re.IGNORECASE)
 
 
 def has_prompt_injection(text: str) -> bool:
@@ -48,6 +49,18 @@ def deterministic_classification(message: EmailMessage) -> Classification:
 
 def extract_urls(text: str) -> list[str]:
     return _URL_RE.findall(text)
+
+
+def offer_below_floor(text: str, minimum_price: float | None) -> bool:
+    if minimum_price is None:
+        return False
+    for match in _CURRENCY_RE.findall(text):
+        try:
+            if float(match.replace(",", "")) < minimum_price:
+                return True
+        except ValueError:
+            return True
+    return False
 
 
 def validate_public_http_url(url: str) -> bool:

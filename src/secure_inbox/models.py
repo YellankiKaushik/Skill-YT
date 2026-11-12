@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+import os
 from typing import Any
 
 
@@ -30,6 +31,8 @@ class EmailMessage:
     body: str
     label_ids: frozenset[str] = field(default_factory=frozenset)
     internal_date: str = ""
+    rfc822_message_id: str = ""
+    references: str = ""
 
 
 @dataclass(frozen=True)
@@ -45,6 +48,8 @@ class Draft:
     to: str
     subject: str
     body: str
+    in_reply_to: str = ""
+    references: str = ""
 
 
 @dataclass(frozen=True)
@@ -52,6 +57,19 @@ class Policy:
     sponsorship_enabled: bool = False
     approved_terms: str = ""
     minimum_price: float | None = None
+
+    @classmethod
+    def from_env(cls) -> "Policy":
+        enabled = os.getenv("SPONSORSHIP_ENABLED", "false").lower() == "true"
+        terms = os.getenv("SPONSORSHIP_APPROVED_TERMS", "")
+        price_text = os.getenv("SPONSORSHIP_MINIMUM_PRICE", "").strip()
+        try:
+            minimum = float(price_text) if price_text else None
+        except ValueError as exc:
+            raise ValueError("SPONSORSHIP_MINIMUM_PRICE must be a number") from exc
+        if minimum is not None and minimum < 0:
+            raise ValueError("SPONSORSHIP_MINIMUM_PRICE cannot be negative")
+        return cls(enabled, terms, minimum)
 
 
 def parse_classification(payload: Any) -> Classification:

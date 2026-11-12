@@ -31,6 +31,8 @@ Set `OPENAI_API_KEY`, `CLASSIFIER_MODEL`, and `DRAFTER_MODEL` in your local envi
 6. Set `GMAIL_CREDENTIALS_PATH` and `GMAIL_TOKEN_PATH` to private local files. Run `python -m secure_inbox.cli --live` to trigger desktop OAuth and read one inbox page. No polling loop runs.
 7. Inspect drafts manually in Gmail's Drafts folder. The app never sends them.
 
+For sponsorship workflows, set `SPONSORSHIP_ENABLED=true`, `SPONSORSHIP_APPROVED_TERMS`, and `SPONSORSHIP_MINIMUM_PRICE` in the process environment. The floor is interpreted in the business's chosen currency units. If any value is absent, sponsorship messages stay in manual review; offers with detected currency amounts below the floor also stay in review.
+
 Google may require OAuth verification for restricted scopes. Review Google's [scope table](https://developers.google.com/workspace/gmail/api/auth/scopes) and [draft creation method](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.drafts/create) before enabling account access.
 
 ## Docker HTML snapshot inspection
