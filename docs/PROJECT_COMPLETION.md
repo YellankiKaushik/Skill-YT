@@ -1,34 +1,37 @@
-# Skill-YT Project Completion
+# SKILL-YT PROJECT CLOSEOUT REPORT
 
-## Project
+**Status:** COMPLETE
 
-Skill-YT is an offline-first reference application for classifying inbox messages and creating human-reviewed drafts. Its Python application defaults to synthetic data and offline behavior. The reusable `$secure-inbox-agent` Codex skill guides developers building or auditing inbox agents, with emphasis on untrusted email, least capability, review gates, recovery, and adversarial tests.
+**Repository URL:** https://github.com/YellankiKaushik/Skill-YT
 
-The original v1.1.0 release remains published: [Skill-YT v1.1.0](https://github.com/YellankiKaushik/Skill-YT/releases/tag/v1.1.0).
+**Original release URL:** https://github.com/YellankiKaushik/Skill-YT/releases/tag/v1.1.0
 
-## Independent acceptance example
+**New acceptance example URL:** https://github.com/YellankiKaushik/Skill-YT/tree/main/examples/skill-acceptance-test
 
-The repository now includes `examples/skill-acceptance-test/`, a standalone Node.js example using built-in modules and synthetic fixtures. It checks ordinary and sponsorship inquiries, prompt injection, credential phishing, human review, duplicate processing, crash-window recovery, malformed input, and absence of sending or network/Gmail integrations. It runs without npm dependencies, Gmail, AI-provider credentials, or Docker.
+**New pull request URL:** https://github.com/YellankiKaushik/Skill-YT/pull/5
 
-The example’s source was inspected and the tests and demo were executed locally. Codex skill discovery was confirmed and the installed skill guidance was reviewed. A model-backed skill invocation was not verified: Codex CLI rejected the configured model for the signed-in ChatGPT account before model execution.
+**Merged:** YES. PR #5 merged the example, CI job, and README section. PR #6 merged the final verification details for this report.
 
-## Test results
+**Final main SHA for acceptance publication:** `f7ad9c3c545a7a0252204699a31fa38cb9140d94` (PR #5 merge). The closeout report was subsequently committed on main in PR #6 at `fa5fe9dd9a3fb7ec928d839e3ed08556413e9cc3`.
 
-- Python: **45 passed, 1 skipped** (the Docker integration test is skipped locally because Docker Desktop is unavailable).
-- Ruff: passed.
-- Python offline demo: passed; no send operation is available.
-- Node acceptance test: **12 passed, 0 failed, 0 skipped**.
-- Node offline demo: passed; safe drafts remain pending review, prompt injection is routed to manual review, and duplicate input is skipped.
-- GitHub Actions PR run [44520132955](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520132955): **passed** on the final PR commit. Python tests, Docker inspector, and Node acceptance all succeeded. The PR head also passed [run 44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638).
+**Python tests:** 45 passed, 1 skipped locally. The skipped test requires a local Docker engine; the real Docker integration job passed in GitHub Actions.
 
-## Publication status
+**Node acceptance tests:** 12 passed, 0 failed, 0 skipped.
 
-- Acceptance example on `main`: **YES**. Remote verification confirmed the example files and original skill are present.
-- Pull request: [#5](https://github.com/YellankiKaushik/Skill-YT/pull/5), **merged** after all checks passed.
-- Feature branch closeout commit: `5e56f5f92e67fd91251a171ccc7d44a142e1974f`.
-- Main SHA publishing the acceptance example: `f7ad9c3c545a7a0252204699a31fa38cb9140d94`.
-- GitHub Actions: [PR checks 44520132955](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520132955) and [post-merge checks 44520289145](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520289145) both succeeded.
+**Docker CI:** PASSED. The existing Docker inspector job passed for PR #5 and after merge.
 
-## Limitations
+**Offline demonstrations:** PASSED for both the Python application and the independent Node.js example. Node demo results keep safe drafts pending human review, route malicious content for review, and skip duplicates.
 
-Live Gmail remains mocked by user choice. No Gmail account was accessed and no message was sent. External AI-provider and Plurai behavior are not verified. The Node example illustrates single-worker in-memory idempotency and is not evidence of distributed or exactly-once processing. This offline-first project is safe to announce as an offline reference implementation; it is not a claim of production readiness or perfect prompt-injection protection.
+**Codex skill invocation:** Skill discovery was confirmed and the installed skill guidance was reviewed. A separate model-backed invocation was not verified: Codex CLI rejected the configured `gpt-6.1-sol` model for the signed-in ChatGPT account before model execution.
+
+**GitHub Actions URL:** [PR checks 44520132955](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520132955), [post-merge checks 44520289145](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520289145), and [closeout update checks 44520683561](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520683561). Python, Docker, and Node jobs passed.
+
+**Security checks:** The example uses synthetic `.invalid` addresses, only Node built-ins, and no credentials, Gmail adapter, network client, or send operation. Tests check the absence of provider/network integrations, human-review behavior, injection handling, duplicate recovery, malformed inputs, and sponsorship safeguards. The PR diff scan found no personal paths, credentials, or private mailbox details.
+
+**Real Gmail:** Deliberately not connected; Gmail remains mocked by user choice. No mailbox was accessed and no message was sent.
+
+**Remaining optional integrations:** Live Gmail, an external AI provider, and Plurai are not verified and are not required to run the offline project or example.
+
+**Safe to announce publicly as an offline-first project:** YES, as an offline reference implementation and demonstration. This is not a claim of production readiness, complete prompt-injection protection, live Gmail verification, or distributed exactly-once processing.
+
+**Manual actions required:** None for this closeout. Keep Gmail mocked unless the user later chooses to configure and authorize a dedicated test account.
