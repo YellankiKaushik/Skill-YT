@@ -19,15 +19,15 @@ The example’s source was inspected and the tests and demo were executed locall
 - Python offline demo: passed; no send operation is available.
 - Node acceptance test: **12 passed, 0 failed, 0 skipped**.
 - Node offline demo: passed; safe drafts remain pending review, prompt injection is routed to manual review, and duplicate input is skipped.
-- GitHub Actions: pending publication of the feature branch.
+- GitHub Actions PR run [44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638): **passed**. The existing Python test job, Docker inspector job, and new Node acceptance job all succeeded.
 
 ## Publication status
 
-- Acceptance example on `main`: pending pull request and remote verification.
-- Pull request: pending.
-- Feature commit: pending.
+- Acceptance example on `main`: pending merge and final remote verification.
+- Pull request: [#5](https://github.com/YellankiKaushik/Skill-YT/pull/5), all three required CI jobs passed; merge is pending.
+- Feature commit: `f8b20f8f3bd48926d45b7e06661766add768baf7`.
 - Final `main` SHA: pending remote verification.
-- GitHub Actions run: pending.
+- GitHub Actions run: [44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638), successful.
 
 ## Limitations
 
