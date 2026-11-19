@@ -1,0 +1,9 @@
+{
+  "name": "secure-inbox-skill-acceptance-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "demo": "node inbox.mjs"
+  }
+}
