@@ -175,7 +175,8 @@ class GmailClient:
                 headers = message.get("payload", {}).get("headers", [])
                 for header in headers:
                     if header.get("name", "").lower() == IDEMPOTENCY_HEADER.lower():
-                        marker = header.get("value", "")
+                        raw_marker = header.get("value", "")
+                        marker = raw_marker.strip() if isinstance(raw_marker, str) else ""
                         if marker:
                             index[marker] = {
                                 "id": draft_id,
