@@ -50,6 +50,7 @@ class Draft:
     body: str
     in_reply_to: str = ""
     references: str = ""
+    source_message_id: str = ""
 
 
 @dataclass(frozen=True)

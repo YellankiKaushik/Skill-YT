@@ -8,7 +8,8 @@
 - Sponsorship processing requires an explicit enable flag, approved terms, and a configured price floor. Detected currency offers below the floor route to review; humans still inspect every draft.
 - Human review is required before any real outbound email. The software never approves or sends its own drafts.
 - Logging records operation types and error classes, not message contents, tokens, OAuth credentials, or API keys.
-- A single worker and per-message idempotency state prevent duplicate work within one process. Labels are not distributed locks or exactly-once delivery. A draft created before a crash can be duplicated on retry.
+- Each created draft carries an opaque SHA-256 operation marker derived from the Gmail message ID. Before creating another draft, the single worker scans Gmail drafts for that marker, so a restart after draft creation but before a label update can recover the existing draft. Gmail labels are not locks or transactional state. Concurrent workers are unsupported; API visibility delays, manual draft deletion, or unavailable draft listing can still require operator review. This is not exactly-once delivery.
+- Live mode requires an explicit single Gmail message ID. It does not list the inbox. Label mutation is disabled by default; enabling it requests `gmail.modify`, which Google documents as able to read, compose, and send mail. The code still exposes no send operation.
 - URL inspection fetches nothing. It accepts supplied static HTML in a `--network none` container. Live browsing needs a separately reviewed controlled-egress proxy with DNS/IP pinning and redirect revalidation; this project does not implement one.
 
 ## OAuth and local secrets

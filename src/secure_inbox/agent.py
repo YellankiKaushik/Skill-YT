@@ -62,9 +62,10 @@ class InboxAgent:
                     self._transition(message.id, WorkflowState.NEEDS_REVIEW)
                     outcomes.append((message.id, "needs_review"))
                     continue
-                self.mailbox.invoke("create_draft", draft=draft, thread_id=message.thread_id)
+                saved = self.mailbox.invoke("create_draft", draft=draft, thread_id=message.thread_id) or {}
                 self._transition(message.id, WorkflowState.DRAFTED)
-                outcomes.append((message.id, "drafted"))
+                outcome = "draft_recovered" if saved.get("already_exists") else "drafted"
+                outcomes.append((message.id, outcome))
             except Exception as exc:
                 logger.warning("message processing failed (%s); message content omitted", type(exc).__name__)
                 self.state.processed.discard(message.id)

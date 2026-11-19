@@ -44,7 +44,7 @@ You can use the repository in two different ways:
 | Keep people in control | Drafts remain available for review; unclear or sensitive cases are routed to manual review. |
 | Apply business rules | Sponsorship workflows require explicitly configured approved terms and a minimum price; email text cannot change these rules. |
 | Resist common prompt injections | Treats email as untrusted data; suspicious instructions trigger review. |
-| Handle repeated work | Uses in-process idempotency and Gmail labels in live mode to track a single-worker workflow. |
+| Handle repeated work | Uses in-process tracking plus a per-message draft marker so a restarted single worker can recover an existing draft. |
 | Run without accounts or API keys | The default demo uses synthetic messages, deterministic classification, and an in-memory mailbox. |
 | Test agent safety | Includes pytest checks for draft-only behavior, malformed inputs, policy checks, and failure paths. |
 | Inspect offline HTML in Docker (optional) | Can process an already-provided HTML snapshot in a restricted, network-disabled container. It does not fetch live URLs. |
@@ -62,7 +62,7 @@ flowchart TD
     Draft --> Human["Human reviews the draft"]
 ~~~
 
-In live mode, Gmail labels also record workflow state. The main implementation lives under [`src/secure_inbox/`](src/secure_inbox/). Its responsibilities are deliberately separated: mailbox operations, classification, policy checks, draft generation, orchestration, and security boundaries. See [architecture details](docs/ARCHITECTURE.md).
+In live mode, Gmail labels optionally record workflow state. The main implementation lives under [`src/secure_inbox/`](src/secure_inbox/). Its responsibilities are deliberately separated: mailbox operations, classification, policy checks, draft generation, orchestration, and security boundaries. Live operation is limited to one explicitly selected message. See [architecture details](docs/ARCHITECTURE.md).
 
 <a id="quick-start"></a>
 
@@ -232,7 +232,7 @@ This repository demonstrates defense in depth, not a guarantee that every possib
 | Deterministic business checks | Approved sponsorship terms and price limits come from configuration, not email instructions. | A human still needs to judge ambiguous financial or contractual offers. |
 | Offline-first execution | Tests and the default demo do not require live mailbox access. | Mocked tests are not evidence of full production reliability. |
 | Restricted HTML inspection | An optional Docker container has no network, no privileged access, and no mounted secrets. | It cannot visit arbitrary external websites; live browsing is not implemented. |
-| Single-worker state tracking | Helps avoid repeat work in the supported process model. | Gmail labels are not distributed locks; crashes can still cause duplicate drafts. |
+| Draft recovery marker | An opaque marker on each app-created draft lets a restarted single worker find a draft created before a crash. | Concurrent workers are unsupported; Gmail visibility delays, manual draft deletion, or API outages can still require operator review. This is not exactly-once delivery. |
 
 **Gmail OAuth warning:** The Google `gmail.compose` and `gmail.modify` scopes can authorize sending email. The narrow application boundary removes send methods from this agent's interface, but it does not change Google's underlying OAuth permissions. Review the [official Gmail scope table](https://developers.google.com/workspace/gmail/api/auth/scopes) before connecting an account. For live experiments, use a dedicated test mailbox first. See [security details](docs/SECURITY.md).
 
@@ -248,7 +248,7 @@ Offline mode is the default. The following integrations are optional and must be
 | `DRAFTER_MODEL` | Model used for drafting | Unset; deterministic template fallback is available. |
 | `GMAIL_CREDENTIALS_PATH` | Local OAuth desktop client JSON | `credentials.json`; keep private. |
 | `GMAIL_TOKEN_PATH` | Local Gmail OAuth token JSON | `token.json`; keep private. |
-| `GMAIL_ENABLE_LABEL_MUTATION` | Permit Gmail label creation and updates | `false`; live CLI requires explicitly enabling it. |
+| `GMAIL_ENABLE_LABEL_MUTATION` | Permit Gmail label creation and updates | `false`; enabling adds `gmail.modify`, which can authorize sending. Labels are optional. |
 | `SPONSORSHIP_ENABLED` | Allow policy-controlled sponsorship drafting | `false` |
 | `SPONSORSHIP_APPROVED_TERMS` | Terms approved by a person | Empty by default. |
 | `SPONSORSHIP_MINIMUM_PRICE` | Minimum sponsorship offer for automated drafting | Unset by default. |
@@ -259,11 +259,11 @@ Use [`.env.example`](.env.example) as a reference for environment variable names
 
 1. Follow the [Windows Gmail setup guide](docs/SETUP_WINDOWS.md) to create a Google Cloud project, enable the Gmail API, and configure desktop OAuth.
 2. Install optional dependencies with `python -m pip install -e ".[gmail]"` (or use your virtual environment's Python).
-3. Set the required environment variables in your local process, including `GMAIL_CREDENTIALS_PATH`, `GMAIL_TOKEN_PATH`, and `GMAIL_ENABLE_LABEL_MUTATION=true`.
-4. Review the risks of `gmail.readonly`, `gmail.compose`, and `gmail.modify` before granting consent.
-5. Only then execute `python -m secure_inbox.cli --live` in a controlled test environment.
+3. Set `GMAIL_CREDENTIALS_PATH` and `GMAIL_TOKEN_PATH` to private local files. By default the app requests `gmail.readonly` and `gmail.compose`; workflow labels are optional.
+4. Review the scope permissions before granting consent. Set `GMAIL_ENABLE_LABEL_MUTATION=true` only if you explicitly want label updates; this adds `gmail.modify`, which can authorize sending.
+5. In a dedicated test account, select one synthetic test message and execute `python -m secure_inbox.cli --live --message-id YOUR_TEST_MESSAGE_ID`.
 
-The live entry point performs a single bounded inbox pass, can create Gmail drafts and workflow labels, and does not start continuous polling or send messages. Production deployment and unattended processing need additional design and review; this project is a reference implementation, not a turnkey autonomous mailbox service.
+The live entry point requires one explicit Gmail message ID and never lists or processes the rest of the inbox. It can create a draft; workflow labels are optional. It does not start continuous polling or send messages. Production deployment and unattended processing need additional design and review; this project is a reference implementation, not a turnkey autonomous mailbox service.
 
 ### Docker (optional)
 
@@ -287,6 +287,7 @@ Skill-YT/
 ├── .github/workflows/ci.yml          # Lint + tests + offline demo in CI
 ├── docs/                             # Architecture, security, Windows setup
 ├── scripts/                          # Skill installer and Docker assets
+├── dist/                             # Clean reusable skill distribution ZIP
 ├── src/secure_inbox/                 # Python application modules
 ├── tests/                            # Synthetic fixtures and tests
 ├── .env.example                      # Environment variable reference
@@ -300,14 +301,15 @@ Skill-YT/
 
 | Area | Status |
 | --- | --- |
-| Python application / offline demo | Implemented; demo and unit tests ran successfully in the reported development workflow. |
-| Reusable Codex skill | Present in the repository; installed and discovered in a separate local project during the reported acceptance work. |
-| Cross-project offline acceptance | Independent offline demo and tests passed in the reported acceptance work. |
-| GitHub CI | Runs Ruff, pytest, and the offline demo. [View workflow status](https://github.com/YellankiKaushik/Skill-YT/actions/workflows/ci.yml). |
-| End-to-end live Codex invocation | Not fully verified in the reported acceptance work because the Codex model service was unreachable. |
-| Live Gmail account | Not connected or tested as a live mailbox in the reported acceptance work. |
-| Docker inspector | Implemented, but Docker engine-based verification was unavailable in the reported environment. |
-| Plurai | Documented as optional; no live simulation run verified. |
+| Python application / offline demo | 45 tests passed locally; Ruff, package dependency check, and offline demo passed. One real-Docker test is skipped on this machine and runs in the Docker CI job. |
+| Reusable Codex skill | Required `name`/`description` metadata and all references are present. The user-wide install matches the repository package; Codex prompt metadata exposes the skill. |
+| Cross-project offline acceptance | Project-local skill installation matched the package; an independent synthetic inbox example passed 3 tests. |
+| GitHub CI | Runs Ruff, pytest, the offline demo, and a real Docker inspector integration test. [View workflow status](https://github.com/YellankiKaushik/Skill-YT/actions/workflows/ci.yml). |
+| End-to-end live Codex invocation | Blocked before model execution: the configured `gpt-6.1-sol` model is unsupported for this ChatGPT sign-in. Skill discovery itself was confirmed. |
+| Live Gmail account | Not connected or tested. OAuth client/token are absent; the Gmail workflow is prepared for one explicitly selected Inbox message. |
+| Docker inspector | Local Docker engine is unavailable. GitHub Actions runs the real container integration test; see the release-readiness document for the result. |
+| External AI provider | Not tested; classifier and drafter model IDs are unset, so no external model request was made. |
+| Plurai | Official product documentation reviewed; no authorized integration or simulation run. |
 
 This table distinguishes code that exists, tests that have run, and integrations not yet verified. It should not be read as a production security certification.
 
@@ -319,6 +321,7 @@ This table distinguishes code that exists, tests that have run, and integrations
 - [Architecture](docs/ARCHITECTURE.md) — Components, data flow, and single-worker behavior.
 - [Security model](docs/SECURITY.md) — Trust boundaries, OAuth limitations, and threat checklist.
 - [Codex skill definition](.agents/skills/secure-inbox-agent/SKILL.md) — The portable `secure-inbox-agent` instructions.
+- [Release readiness](docs/RELEASE_READINESS.md) — Verification scope, live integration prerequisites, and remaining limits.
 - [Video research brief](VIDEO_RESEARCH.md) — Design input and identified assumptions.
 - [Official Codex skills documentation](https://developers.openai.com/codex/skills/) — How Codex discovers and uses skills.
 

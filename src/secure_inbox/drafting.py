@@ -2,6 +2,8 @@
 
 import json
 import logging
+import re
+from email.utils import getaddresses
 
 from .classifier import _chat_completion
 from .config import Settings
@@ -14,6 +16,8 @@ logger = logging.getLogger(__name__)
 def create_reply(
     message: EmailMessage, classification: Classification, policy: Policy, settings: Settings
 ) -> Draft | None:
+    if not _safe_sender(message.sender) or _unsafe_header_text(message.subject):
+        return None
     if classification.category in {Category.SPAM, Category.SUSPICIOUS}:
         return None
     if has_prompt_injection(message.body):
@@ -49,7 +53,10 @@ def create_reply(
         ],
     }
     try:
-        text = _chat_completion(settings, payload).strip()[:12000]
+        result = _chat_completion(settings, payload)
+        if not isinstance(result, str) or len(result) > 12000:
+            return _template_reply(message, classification)
+        text = result.strip()
         if not text or has_prompt_injection(text):
             return _template_reply(message, classification)
         return Draft(
@@ -58,6 +65,7 @@ def create_reply(
             text,
             message.rfc822_message_id,
             _reply_references(message),
+            message.id,
         )
     except (OSError, ValueError, KeyError, TypeError):
         logger.warning("draft provider failed; using deterministic review template")
@@ -77,11 +85,30 @@ def _template_reply(message: EmailMessage, classification: Classification) -> Dr
         body,
         message.rfc822_message_id,
         _reply_references(message),
+        message.id,
     )
 
 
+def _safe_sender(sender: str) -> bool:
+    if not sender or len(sender) > 1000 or _unsafe_header_text(sender):
+        return False
+    parsed = getaddresses([sender])
+    if len(parsed) != 1:
+        return False
+    address = parsed[0][1]
+    if not address or address.count("@") != 1 or any(c.isspace() for c in address):
+        return False
+    local, domain = address.rsplit("@", 1)
+    return bool(local and domain and "." in domain and not domain.startswith(".") and not domain.endswith("."))
+
+
+def _unsafe_header_text(value: str) -> bool:
+    return any(ord(char) < 32 or ord(char) == 127 for char in value)
+
+
 def _reply_subject(subject: str) -> str:
-    return subject if subject.lower().startswith("re:") else f"Re: {subject}"[:500]
+    normalized = re.sub(r"\s+", " ", subject).strip()[:500]
+    return normalized if normalized.lower().startswith("re:") else f"Re: {normalized}"[:500]
 
 
 def _reply_references(message: EmailMessage) -> str:

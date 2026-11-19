@@ -1,7 +1,9 @@
 """Provider-independent classification with an OpenAI-compatible HTTP adapter."""
 
 import json
+import ipaddress
 import logging
+import urllib.parse
 import urllib.request
 from typing import Protocol
 
@@ -59,6 +61,23 @@ def _message_data(message: EmailMessage) -> dict[str, str]:
 
 
 def _chat_completion(settings: Settings, payload: dict) -> str:
+    parsed = urllib.parse.urlsplit(settings.openai_base_url)
+    host = parsed.hostname or ""
+    loopback = host == "localhost"
+    if not loopback:
+        try:
+            loopback = ipaddress.ip_address(host).is_loopback
+        except ValueError:
+            loopback = False
+    if (
+        parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or not host
+        or (parsed.scheme != "https" and not (parsed.scheme == "http" and loopback))
+    ):
+        raise ValueError("provider URL must use HTTPS (HTTP is allowed only on loopback)")
     request = urllib.request.Request(
         settings.openai_base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(payload).encode(),
