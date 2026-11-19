@@ -11,7 +11,7 @@
 
 **Branches found initially:** `main`, `docs/readme-update`, `feat/secure-inbox-agent`, `feat/video-to-project-skill`, `fix/gmail-threading-and-sponsorship-floor`, and `test/final-integration-hardening` (six total).  
 **Merged branches deleted:** `docs/readme-update` (PR #3), `feat/secure-inbox-agent` (PR #1), `fix/gmail-threading-and-sponsorship-floor` (PR #2), and `test/final-integration-hardening` (PR #4).  
-**Legacy branch:** `feat/video-to-project-skill`, commit `7fbd9f335d6c19f6d69e55dc9dc3139701dfd999`, contained only an abandoned tutorial-skill README/setup note and ignore rules. After review, backup, and user approval, its remote branch was deleted. The verified backup is `C:\Users\YellankiKaushik\Documents\Skill-YT-branch-backups\feat-video-to-project-skill-7fbd9f335d6c19f6d69e55dc9dc3139701dfd999.bundle` (SHA-256 `5a97824a270537d21df0dfd4e9f3802c15db3a7bd1432e874e937d2a7983ad33`).  
+**Legacy branch:** `feat/video-to-project-skill`, commit `7fbd9f335d6c19f6d69e55dc9dc3139701dfd999`, contained only an abandoned tutorial-skill README/setup note and ignore rules. After review, backup, and user approval, its remote branch was deleted. The verified backup is `<backup directory>/feat-video-to-project-skill-7fbd9f335d6c19f6d69e55dc9dc3139701dfd999.bundle` (SHA-256 `5a97824a270537d21df0dfd4e9f3802c15db3a7bd1432e874e937d2a7983ad33`).  
 **Documentation branch:** PR #8's head branch was automatically deleted after merge.  
 **Branches remaining at audit:** `main` only, locally and remotely.  
 **Open PRs at audit:** none.  
@@ -55,3 +55,4 @@
 ---
 
 This report records the repository state and evidence at the README merge and post-merge audit. A report-only PR may advance `main`; the final current main SHA is reported in the release handoff.
+
