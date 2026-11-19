@@ -55,4 +55,3 @@
 ---
 
 This report records the repository state and evidence at the README merge and post-merge audit. A report-only PR may advance `main`; the final current main SHA is reported in the release handoff.
-
