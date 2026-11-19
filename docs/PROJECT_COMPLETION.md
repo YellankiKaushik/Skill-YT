@@ -19,15 +19,15 @@ The example’s source was inspected and the tests and demo were executed locall
 - Python offline demo: passed; no send operation is available.
 - Node acceptance test: **12 passed, 0 failed, 0 skipped**.
 - Node offline demo: passed; safe drafts remain pending review, prompt injection is routed to manual review, and duplicate input is skipped.
-- GitHub Actions PR run [44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638): **passed**. The existing Python test job, Docker inspector job, and new Node acceptance job all succeeded.
+- GitHub Actions PR run [44520132955](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520132955): **passed** on the final PR commit. Python tests, Docker inspector, and Node acceptance all succeeded. The PR head also passed [run 44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638).
 
 ## Publication status
 
-- Acceptance example on `main`: pending merge and final remote verification.
-- Pull request: [#5](https://github.com/YellankiKaushik/Skill-YT/pull/5), all three required CI jobs passed; merge is pending.
-- Feature commit: `f8b20f8f3bd48926d45b7e06661766add768baf7`.
-- Final `main` SHA: pending remote verification.
-- GitHub Actions run: [44519934638](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44519934638), successful.
+- Acceptance example on `main`: **YES**. Remote verification confirmed the example files and original skill are present.
+- Pull request: [#5](https://github.com/YellankiKaushik/Skill-YT/pull/5), **merged** after all checks passed.
+- Feature branch closeout commit: `5e56f5f92e67fd91251a171ccc7d44a142e1974f`.
+- Main SHA publishing the acceptance example: `f7ad9c3c545a7a0252204699a31fa38cb9140d94`.
+- GitHub Actions: [PR checks 44520132955](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520132955) and [post-merge checks 44520289145](https://github.com/YellankiKaushik/Skill-YT/actions/runs/44520289145) both succeeded.
 
 ## Limitations
 
