@@ -190,7 +190,7 @@ GitHub Actions runs three independent jobs:
 
 | Job | Checks | Run locally |
 | --- | --- | --- |
-| <code>test</code> | Ruff, Python tests, Python offline demo | Use the Python commands above. |
+| <code>test</code> | Ruff, Python 3.11 and 3.12 tests, Python offline demo | Use the Python commands above. |
 | <code>docker-inspector</code> | Builds the restricted inspector container and runs its integration tests | Requires Docker Desktop/Engine; see [Docker instructions](docs/SETUP_WINDOWS.md#docker-html-snapshot-inspection). |
 | <code>node-acceptance</code> | Node acceptance tests and offline demo | Run <code>npm test</code> and <code>npm run demo</code> in <code>examples/skill-acceptance-test</code>. |
 
