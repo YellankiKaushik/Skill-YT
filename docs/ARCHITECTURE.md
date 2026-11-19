@@ -12,7 +12,7 @@ The agent only receives a `DraftOnlyBoundary`; the Google service object remains
 
 The offline deterministic classifier is the fallback when provider credentials, model IDs, parsing, or network calls fail. A low-confidence classification is routed for review. Sponsorship drafting is disabled unless both a policy enable flag and approved terms are present; no minimum rate or acceptance is invented. Never put confidential mailbox contents in model prompts without a deliberate data-processing review.
 
-The first live runner is single-worker and one-shot. Gmail labels aid recovery and visibility; they are not a lock or transactional state store. A process interruption after Gmail creates a draft but before the label changes can cause a duplicate on retry. Concurrent workers are unsupported. See [gmail-workflow.md](../.agents/skills/secure-inbox-agent/references/gmail-workflow.md).
+The live runner requires one explicitly selected message and is single-worker. Each draft stores an opaque marker derived from that Gmail message ID. On retry, the adapter scans paginated Gmail drafts and recovers the existing draft before attempting creation. Labels are optional and are not locks or transactional state. If draft listing is unavailable, the adapter fails closed; concurrent workers, Gmail visibility delays, or a user deleting the marked draft remain outside the exactly-once guarantee. See [gmail-workflow.md](../.agents/skills/secure-inbox-agent/references/gmail-workflow.md).
 
 ## Research provenance
 

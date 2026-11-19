@@ -23,3 +23,21 @@ def test_docker_absence_fails_safely(monkeypatch):
     with pytest.raises(SandboxUnavailable, match="unavailable"):
         OfflineHtmlInspector().inspect_html("<p>hello</p>")
 
+
+def test_oversized_html_is_rejected_before_container_start(monkeypatch):
+    def should_not_run(*args, **kwargs):
+        raise AssertionError("Docker must not run for oversized input")
+
+    monkeypatch.setattr(subprocess, "run", should_not_run)
+    with pytest.raises(ValueError, match="1 MB"):
+        OfflineHtmlInspector().inspect_html("x" * (1_000_000 + 1))
+
+
+def test_container_timeout_fails_closed(monkeypatch):
+    def timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+
+    monkeypatch.setattr(subprocess, "run", timeout)
+    with pytest.raises(SandboxUnavailable, match="time limit"):
+        OfflineHtmlInspector(timeout=1).inspect_html("<p>safe</p>")
+

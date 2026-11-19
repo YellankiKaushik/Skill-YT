@@ -28,8 +28,9 @@ Set `OPENAI_API_KEY`, `CLASSIFIER_MODEL`, and `DRAFTER_MODEL` in your local envi
 3. Install the optional adapter dependencies: `python -m pip install -e ".[gmail]"`.
 4. Start with `gmail.readonly` and `gmail.compose`; Google classifies both as restricted scopes. `gmail.compose` authorizes draft management and sending. The application does not expose sending, but OAuth cannot be described as draft-only.
 5. Label mutations are off by default. To enable them, set `GMAIL_ENABLE_LABEL_MUTATION=true`; this adds `gmail.modify`, which grants Gmail read, compose, and send permissions. Existing labels are looked up before creation.
-6. Set `GMAIL_CREDENTIALS_PATH` and `GMAIL_TOKEN_PATH` to private local files. Run `python -m secure_inbox.cli --live` to trigger desktop OAuth and read one inbox page. No polling loop runs.
-7. Inspect drafts manually in Gmail's Drafts folder. The app never sends them.
+6. Set `GMAIL_CREDENTIALS_PATH` and `GMAIL_TOKEN_PATH` to private local files. Label mutation is optional and off by default; enabling it adds `gmail.modify`, which Google authorizes for reading, composing, and sending.
+7. For a controlled smoke test, choose one synthetic message in a dedicated test mailbox and run `python -m secure_inbox.cli --live --message-id MESSAGE_ID`. The CLI fetches only that ID; it does not list the inbox or poll.
+8. Inspect the resulting draft and thread manually in Gmail's Drafts folder. The app never sends. A marker stored in the draft lets a restarted single worker find its prior draft.
 
 For sponsorship workflows, set `SPONSORSHIP_ENABLED=true`, `SPONSORSHIP_APPROVED_TERMS`, and `SPONSORSHIP_MINIMUM_PRICE` in the process environment. The floor is interpreted in the business's chosen currency units. If any value is absent, sponsorship messages stay in manual review; offers with detected currency amounts below the floor also stay in review.
 

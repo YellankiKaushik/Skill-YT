@@ -2,7 +2,7 @@
 
 ## Narrow adapter
 
-The reference implementation requests read-only and compose OAuth scopes for a one-shot inbox read and draft creation. Google documents `gmail.compose` as permitting draft management and sending. Optional labels require `gmail.modify`, which also permits sending. Never describe either scope as draft-only.
+The reference implementation requests read-only and compose OAuth scopes for one explicitly selected message and draft creation. Google documents `gmail.compose` as permitting draft management and sending. Optional labels require `gmail.modify`, which also permits sending. Never describe either scope as draft-only.
 
 ## States and retries
 
@@ -10,5 +10,5 @@ Use labels such as `AI/Processing`, `AI/Drafted`, `AI/Needs-Review`, and `AI/Fai
 
 When creating a reply in a thread, include its Gmail `threadId` and RFC `In-Reply-To`/`References` headers when available. Keep the reply subject compatible with the existing conversation.
 
-For one worker, skip IDs already in terminal states and retry old `AI/Processing` items according to an explicit stale-state policy. If a failure occurs before draft creation, mark failed and retry later. If draft creation succeeds but state update fails, check for an existing draft or accept that duplicate drafts are possible. Gmail labels do not provide atomic compare-and-set or a distributed lock. Prevent overlapping workers externally.
+For one worker, skip IDs already in terminal states and retry old `AI/Processing` items according to an explicit stale-state policy. Persist an opaque per-message marker in each created draft. Before creating, scan paginated drafts and recover an existing matching marker; if a create response is ambiguous, inspect drafts again before returning failure. If a failure occurs before draft creation, mark failed and retry later. Gmail labels do not provide atomic compare-and-set or a distributed lock. Concurrent workers, Gmail visibility delays, and a user deleting the marked draft remain outside the guarantee; do not claim exactly-once processing. Prevent overlapping workers externally.
 

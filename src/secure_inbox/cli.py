@@ -31,6 +31,28 @@ class DemoMailbox:
         self.states[message_id] = state.value
 
 
+class SelectedMessageMailbox:
+    """Bound live processing to one message selected explicitly by the operator."""
+
+    def __init__(self, client, message_id):
+        self.client = client
+        self.message_id = message_id
+
+    def list_inbox(self):
+        message = self.client.get_message(self.message_id)
+        if "INBOX" not in message.label_ids:
+            raise ValueError("selected Gmail message is not in the Inbox")
+        return [message]
+
+    def create_draft(self, draft, thread_id=""):
+        return self.client.create_draft(draft, thread_id)
+
+    def transition(self, message_id, state):
+        if self.client.allow_label_mutation:
+            return self.client.transition(message_id, state)
+        return None
+
+
 def demo() -> int:
     messages = [
         EmailMessage("demo-1", "thread-1", "hello@example.test", "Question", "Can you share more about your work?"),
@@ -60,20 +82,26 @@ def demo() -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="secure-inbox")
     parser.add_argument("--live", action="store_true", help="enable explicit Gmail access")
+    parser.add_argument("--message-id", help="process only this explicitly selected Gmail message")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     if not args.live:
+        if args.message_id:
+            parser.error("--message-id requires --live")
         return demo()
+    if (
+        not args.message_id
+        or len(args.message_id) > 256
+        or any(ord(char) < 33 or ord(char) == 127 for char in args.message_id)
+    ):
+        parser.error("--live requires exactly one --message-id (maximum 256 characters)")
     settings = Settings.from_env()
     from .gmail_client import GmailClient
-    if not settings.enable_label_mutation:
-        raise RuntimeError(
-            "Live processing needs workflow labels; explicitly enable them with "
-            "GMAIL_ENABLE_LABEL_MUTATION=true after reviewing gmail.modify OAuth scope risk."
-        )
     client = GmailClient.from_oauth(settings.gmail_credentials_path, settings.gmail_token_path, settings.enable_label_mutation)
-    client.ensure_labels()
-    agent = InboxAgent(client, OpenAICompatibleClassifier(settings), settings, Policy.from_env())
+    if settings.enable_label_mutation:
+        client.ensure_labels()
+    mailbox = SelectedMessageMailbox(client, args.message_id)
+    agent = InboxAgent(mailbox, OpenAICompatibleClassifier(settings), settings, Policy.from_env())
     print(json.dumps({"outcomes": agent.run_once(), "continuous_polling": False}, indent=2))
     return 0
 
