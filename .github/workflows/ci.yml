@@ -36,3 +36,16 @@ jobs:
         env:
           SECURE_INBOX_DOCKER_INTEGRATION: "1"
 
+  node-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Run independent acceptance tests
+        working-directory: examples/skill-acceptance-test
+        run: npm test
+      - name: Run offline acceptance demo
+        working-directory: examples/skill-acceptance-test
+        run: npm run demo

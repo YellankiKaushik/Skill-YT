@@ -220,6 +220,19 @@ human review step and add tests for retries or duplicate delivery.
 
 <a id="security-model"></a>
 
+## 🧪 Independent Skill Acceptance Test
+
+This separate offline Node.js example demonstrates how an inbox workflow built with the `$secure-inbox-agent` guidance can be checked independently. It uses synthetic messages and Node's built-in test runner, without Gmail, an AI-provider key, Docker, or network access. It verifies human-reviewed drafts, cautious sponsorship handling, prompt-injection review, duplicate recovery, malformed input handling, and the absence of a send capability. The skill was discovered and its guidance reviewed; a model-backed invocation could not be verified in this environment.
+
+Run it with Node.js 24 LTS or another compatible supported release:
+
+```sh
+cd examples/skill-acceptance-test
+npm test
+npm run demo
+```
+
+See the [independent acceptance-test README](examples/skill-acceptance-test/README.md) for details.
 ## 🔐 Security first, by design
 
 This repository demonstrates defense in depth, not a guarantee that every possible agent attack is prevented.
