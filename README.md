@@ -1,361 +1,259 @@
-<a id="top"></a>
+# Secure Inbox AI Agent
 
-<div align="center">
+**An offline-first reference implementation for safer inbox workflows, with human-reviewed drafts and a reusable Codex skill.**
 
-<h1>🛡️ Secure Inbox AI Agent</h1>
+This project helps developers explore how to classify inbox messages, apply fixed business rules, and prepare replies without giving an AI agent a send-mail capability. The default demo uses synthetic messages and makes no Gmail, Docker, or AI-provider connection.
 
-<strong>A safer way to build, test, and reuse AI-powered inbox workflows</strong>
+It is useful for developers learning to build inbox assistants, teams reviewing business or sponsorship inquiries, and Codex users who want reusable guidance for building or auditing inbox-agent code. It is a security-focused reference project, not a production-ready autonomous mailbox service.
 
-Offline-first Gmail assistant · Human-reviewed drafts · Reusable Codex Agent Skill
+## Start here
 
-<a href="#quick-start">Get started</a> · <a href="#use-the-codex-skill">Use the Codex skill</a> · <a href="#security-model">Security model</a> · <a href="#documentation">Documentation</a>
+- [Run the Python demo](#quick-start)
+- [See what the demo prints](#what-happens-in-the-python-demo)
+- [Run the independent Node.js example](#independent-nodejs-acceptance-example)
+- [Install the Codex skill](#install-and-use-the-codex-skill)
+- [Follow the hands-on test guide](docs/TEST_IT_YOURSELF.md)
+- [Review security boundaries](#security-and-limitations)
 
-</div>
+## What is included?
 
-## 👋 What is this project?
-
-Secure Inbox AI Agent is an open-source reference implementation of an inbox assistant that reads and categorizes messages, prepares draft replies, and leaves the final decision to a human. It pairs a Python application with a reusable [Codex Agent Skill](.agents/skills/secure-inbox-agent/SKILL.md) named `secure-inbox-agent`.
-
-Most AI agent demos focus on what an assistant can do. This project also focuses on what it must not do: follow malicious instructions embedded in messages, bypass approved business rules, expose credentials, or send mail autonomously.
-
-You can use the repository in two different ways:
-
-| You want to… | Use… | What happens |
+| Part | What it is | Default behavior |
 | --- | --- | --- |
-| Try a secure inbox workflow | Python application | Run a fully offline demo with sample emails, simulated state transitions, and reviewable drafts. |
-| Build or audit an inbox agent in another project | Codex skill ([`$secure-inbox-agent`](.agents/skills/secure-inbox-agent/SKILL.md)) | Codex follows reusable security and testing instructions while working on that project's code. |
+| Python application | Executable inbox-processing reference code under <code>src/secure_inbox/</code>. | Offline demo with synthetic messages and an in-memory mailbox. |
+| Codex Agent Skill | Reusable instructions in <code>.agents/skills/secure-inbox-agent/SKILL.md</code> and its references. | Helps Codex build or audit inbox agents in another project. It is guidance, not a background service. |
+| Independent Node.js acceptance example | A small standalone demonstration under <code>examples/skill-acceptance-test/</code>. | Uses Node built-ins and synthetic messages; no Gmail, network, API key, or npm dependencies. |
 
-> [!IMPORTANT]
-> The skill is not a standalone background service. It is a set of instructions for Codex. The Python app is the executable inbox workflow. Neither automatically sends emails; live Gmail access is explicitly opt-in.
+## Features and boundaries
 
-### Where could this be useful?
+- Classifies business questions, sponsorship requests, suspicious messages, spam, and uncertain cases.
+- Creates safe acknowledgment drafts for eligible messages; uncertain or sensitive messages go to review.
+- Keeps sponsorship drafting off unless approved terms and a minimum price are configured. The default demo routes sponsorship to review.
+- Treats message content as untrusted and applies deterministic checks before drafting.
+- Exposes draft creation but no agent-accessible send operation.
+- Skips duplicates in the demo and recovers a marked draft after restart in the supported single-worker Gmail flow.
+- Includes an optional Gmail adapter for one explicitly selected Inbox message; live OAuth is never enabled by default.
+- Includes an optional offline HTML snapshot inspector for Docker. It does not fetch URLs.
+- Installs the reusable Codex skill at user or project scope.
+- Tests Python behavior, the Node acceptance example, and the restricted Docker inspector in GitHub Actions.
 
-- Developers building a Gmail assistant without giving an AI model a general-purpose mailbox client.
-- Creators and small teams reviewing business inquiries or sponsorship requests while keeping pricing decisions under human control.
-- Security-minded AI builders testing prompt injection, unsafe tools, retry behavior, and unexpected input.
-- Codex users who want a repeatable checklist for new inbox-agent projects rather than rewriting instructions every time.
+Recovery targets one worker. It is not distributed locking or exactly-once processing. Gmail visibility delays, API outages, manual draft deletion, and concurrent workers remain outside the guarantee.
 
-## ✨ What it can do
+## Architecture
 
-| Capability | How it works |
-| --- | --- |
-| Classify inbox messages | Categorizes business inquiries, sponsorships, general questions, spam, suspicious messages, and items needing manual review. |
-| Create drafts, not send messages | The agent-facing boundary allows draft creation but exposes no send operation or unrestricted Gmail API access. |
-| Keep people in control | Drafts remain available for review; unclear or sensitive cases are routed to manual review. |
-| Apply business rules | Sponsorship workflows require explicitly configured approved terms and a minimum price; email text cannot change these rules. |
-| Resist common prompt injections | Treats email as untrusted data; suspicious instructions trigger review. |
-| Handle repeated work | Uses in-process tracking plus a per-message draft marker so a restarted single worker can recover an existing draft. |
-| Run without accounts or API keys | The default demo uses synthetic messages, deterministic classification, and an in-memory mailbox. |
-| Test agent safety | Includes pytest checks for draft-only behavior, malformed inputs, policy checks, and failure paths. |
-| Inspect offline HTML in Docker (optional) | Can process an already-provided HTML snapshot in a restricted, network-disabled container. It does not fetch live URLs. |
-| Reuse instructions across repositories | Installs a `SKILL.md` plus references for Codex at user or project scope. |
-
-## 🧭 How it works
+Mailbox access, untrusted-message handling, policy, drafting, and persistence are separate. The model does not receive a Gmail client or credentials. Email text cannot change application policy.
 
 ~~~mermaid
 flowchart TD
-    Offline["Synthetic emails (default)"] --> Classify["Classify messages"]
-    Live["Bounded Gmail read (optional OAuth)"] --> Classify
-    Classify --> Policy["Check policy and security"]
-    Policy -->|"Needs review"| Review["Flag for manual review"]
-    Policy -->|"Safe to draft"| Draft["Create in-memory or Gmail draft"]
-    Draft --> Human["Human reviews the draft"]
+    A[ Synthetic messages by default ] --> B[ Read or normalize one selected message ]
+    G[ Optional Gmail adapter ] --> B
+    B --> C[ Treat message as untrusted data ]
+    C --> D[ Deterministic checks and classification ]
+    D --> E{ Policy and confidence checks }
+    E -->|Unclear, suspicious, or policy missing| F[ Human review ]
+    E -->|Eligible| H[ Create draft only ]
+    H --> I[ Human inspects draft ]
+    F --> I
+    I --> J[ Person decides what to do ]
 ~~~
 
-In live mode, Gmail labels optionally record workflow state. The main implementation lives under [`src/secure_inbox/`](src/secure_inbox/). Its responsibilities are deliberately separated: mailbox operations, classification, policy checks, draft generation, orchestration, and security boundaries. Live operation is limited to one explicitly selected message. See [architecture details](docs/ARCHITECTURE.md).
+The default demo stores drafts and workflow labels in memory. See [architecture](docs/ARCHITECTURE.md) for the component details.
 
-<a id="quick-start"></a>
-
-## 🚀 Quick start: run the offline demo
-
-This is the recommended first step. No Gmail account, Google Cloud project, Docker Desktop, model API key, or Plurai account is needed.
+## Quick start
 
 ### Prerequisites
 
 - Python 3.11 or newer
-- Git to clone the repository
-- A terminal; the examples below use Windows PowerShell
+- Git
+- PowerShell on Windows, or a terminal on macOS/Linux
 
-### 1. Get the project
+The default Python demo has no third-party runtime dependencies. The following commands install test tools in a virtual environment without activating it or changing PowerShell's execution policy.
+
+### Windows PowerShell
 
 ~~~powershell
 git clone https://github.com/YellankiKaushik/Skill-YT.git
-cd Skill-YT
-~~~
-
-### 2. Create a virtual environment
-
-~~~powershell
-py -3 -m venv .venv
-~~~
-
-If `py` is unavailable but Python is installed, use `python -m venv .venv` instead. The commands below use the virtual environment's interpreter directly, so you do not need to change PowerShell's execution policy.
-
-### 3. Install the project and test tools
-
-~~~powershell
+Set-Location Skill-YT
+py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[test]"
-~~~
-
-### 4. Run your first agent demo
-
-~~~powershell
 .\.venv\Scripts\python.exe -m secure_inbox.cli
-~~~
-
-The demo processes three synthetic messages: a general inquiry, a sponsorship request, and a suspicious credential-phishing message. It outputs JSON describing each outcome, simulated labels, and repeated-message handling. With the default policy, it creates one in-memory draft, routes the other messages for review, and demonstrates that the agent cannot invoke a send operation.
-
-**What to expect:** A successful command exits with status 0. The JSON includes `outcomes`, `second_run`, `draft_count`, `labels`, `injection_detected`, and `send_operation_available`.
-
-> [!NOTE]
-> The demo's draft is stored only in the demonstration mailbox in memory.
-
-### 5. Run the tests
-
-~~~powershell
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m ruff check src tests scripts
 ~~~
 
-The [GitHub Actions workflow](.github/workflows/ci.yml) also runs linting, pytest, and the offline demo with Python 3.12. [View CI results](https://github.com/YellankiKaushik/Skill-YT/actions/workflows/ci.yml).
+If <code>py -3.11</code> is unavailable, install Python 3.11+ and use <code>python -m venv .venv</code> instead.
 
-On macOS or Linux:
+### macOS or Linux
 
 ~~~bash
+git clone https://github.com/YellankiKaushik/Skill-YT.git
+cd Skill-YT
 python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[test]'
 .venv/bin/python -m secure_inbox.cli
+.venv/bin/python -m pytest -q
+.venv/bin/python -m ruff check src tests scripts
 ~~~
 
-<a id="use-the-codex-skill"></a>
+## What happens in the Python demo?
 
-## 🤖 Use the skill in Codex
+The CLI processes three synthetic messages:
 
-The `secure-inbox-agent` skill is intended for anyone who wants Codex to build, review, or improve an inbox-connected agent in another codebase. It contains [`SKILL.md`](.agents/skills/secure-inbox-agent/SKILL.md) plus focused guidance on [security](.agents/skills/secure-inbox-agent/references/security.md), [Gmail state management](.agents/skills/secure-inbox-agent/references/gmail-workflow.md), and [adversarial testing](.agents/skills/secure-inbox-agent/references/testing.md).
+1. A routine question gets an in-memory acknowledgment draft.
+2. A sponsorship inquiry is held for review because no approved sponsorship policy is configured.
+3. A suspicious message with an instruction to ignore rules is flagged for review and gets no draft.
 
-### Option A — Install for your user (all projects)
+It repeats the messages to demonstrate duplicate skipping. No email is sent. The draft is an in-memory example, not a Gmail draft; a person must inspect any live Gmail draft before deciding what to do with it.
 
-From the cloned Skill-YT repository:
+A successful run prints JSON like this (observed from the CLI):
+
+~~~json
+{
+  "outcomes": [["demo-1", "drafted"], ["demo-2", "needs_review"], ["demo-3", "needs_review"]],
+  "second_run": [["demo-1", "duplicate_skipped"], ["demo-2", "duplicate_skipped"], ["demo-3", "duplicate_skipped"]],
+  "draft_count": 1,
+  "labels": {
+    "demo-1": "AI/Drafted",
+    "demo-2": "AI/Needs-Review",
+    "demo-3": "AI/Needs-Review"
+  },
+  "injection_detected": true,
+  "send_operation_available": false
+}
+~~~
+
+- <code>outcomes</code>: each message's first-pass result.
+- <code>second_run</code>: the repeated IDs are skipped as duplicates.
+- <code>draft_count</code>: number of in-memory drafts; the demo creates one.
+- <code>labels</code>: simulated states, not Gmail labels.
+- <code>injection_detected</code>: whether the suspicious fixture matched a deterministic check.
+- <code>send_operation_available</code>: <code>false</code>; no send operation is exposed.
+
+The offline demo has no review UI. It shows which messages need a human decision. In live mode, a person must inspect the resulting Gmail draft manually.
+
+## Independent Node.js acceptance example
+
+The standalone example checks routine and sponsorship inquiries, prompt injection, credential theft, human review, duplicate events, crash-window recovery, malformed input, and absence of network/Gmail/send capabilities. It is not a live integration test.
+
+CI uses Node.js 24, a supported LTS release ([release schedule](https://nodejs.org/en/about/previous-releases)). The example has no external packages, so no <code>npm install</code> is required:
 
 ~~~powershell
-.\.venv\Scripts\python.exe scripts/install_skill.py --user --dry-run
-.\.venv\Scripts\python.exe scripts/install_skill.py --user
-~~~
-
-On Windows, the installed folder normally becomes `C:\Users\<your-username>\.agents\skills\secure-inbox-agent\`.
-
-### Option B — Install in one project only
-
-~~~powershell
-.\.venv\Scripts\python.exe scripts/install_skill.py --project "C:\Projects\my-app" --dry-run
-.\.venv\Scripts\python.exe scripts/install_skill.py --project "C:\Projects\my-app"
-~~~
-
-This creates `C:\Projects\my-app\.agents\skills\secure-inbox-agent\`. The skill can then be version-controlled with that project if desired.
-
-**Existing installation?** The installer intentionally refuses to overwrite it, including during dry-run. To update, fetch the latest source, move the existing skill folder to a backup outside `.agents/skills/`, and reinstall. Restore the backup if installation fails.
-
-### Invoke the skill
-
-1. Open Codex in your target project's root directory.
-2. Start a new session if you installed or updated the skill while Codex was already open.
-3. Use the skill picker by typing `$`, or mention `$secure-inbox-agent` directly.
-4. Ask Codex to inspect your code, make changes, and run the target project's actual tests.
-
-A first prompt to copy:
-
-~~~text
-$secure-inbox-agent Audit this repository's inbox agent. Identify
-any Gmail sending capability, prompt-injection risks, missing human
-review gates, broken business-policy checks, and failure-handling gaps.
-Cite file paths and line numbers. Use synthetic test data only.
-~~~
-
-The installed skill provides instructions. Codex must still have permission to read and write the target repository and access a working model service. Skill discovery can succeed even when an end-to-end Codex turn is blocked by connectivity.
-
-## 💬 Example Codex prompts
-
-Use these prompts from the project you want Codex to work on.
-
-### 1. Build a new draft-only assistant
-
-~~~text
-$secure-inbox-agent Build a minimal draft-only Gmail assistant in
-this repository. Start offline with synthetic emails and mocks.
-Separate mailbox access, classification, policy, and drafting.
-Add deterministic security tests. Never send real email.
-~~~
-
-### 2. Audit an existing integration
-
-~~~text
-$secure-inbox-agent Review this inbox integration for OAuth scope
-risks, exposed send tools, prompt injection, unsafe logging, retries,
-and missing human approval. Cite the affected files and propose fixes.
-~~~
-
-### 3. Test sponsorship and pricing rules
-
-~~~text
-$secure-inbox-agent Add tests proving that malicious emails cannot
-change approved sponsorship terms or bypass a configured minimum price.
-Route uncertain cases for manual review.
-~~~
-
-### 4. Review link inspection
-
-~~~text
-$secure-inbox-agent Audit the handling of email URLs and HTML.
-Do not fetch links automatically. Test unsafe inputs and verify that
-offline inspection does not access the network or host credentials.
-~~~
-
-### 5. Trace why a draft was created
-
-~~~text
-$secure-inbox-agent Trace an incoming message through classification,
-policy decisions, draft creation, and state transitions. Explain the
-human review step and add tests for retries or duplicate delivery.
-~~~
-
-<a id="security-model"></a>
-
-## 🧪 Independent Skill Acceptance Test
-
-This separate offline Node.js example demonstrates how an inbox workflow built with the `$secure-inbox-agent` guidance can be checked independently. It uses synthetic messages and Node's built-in test runner, without Gmail, an AI-provider key, Docker, or network access. It verifies human-reviewed drafts, cautious sponsorship handling, prompt-injection review, duplicate recovery, malformed input handling, and the absence of a send capability. The skill was discovered and its guidance reviewed; a model-backed invocation could not be verified in this environment.
-
-Run it with Node.js 24 LTS or another compatible supported release:
-
-```sh
-cd examples/skill-acceptance-test
+Set-Location examples\skill-acceptance-test
 npm test
 npm run demo
-```
-
-See the [independent acceptance-test README](examples/skill-acceptance-test/README.md) for details.
-## 🔐 Security first, by design
-
-This repository demonstrates defense in depth, not a guarantee that every possible agent attack is prevented.
-
-| Safeguard | What it means | Important limitation |
-| --- | --- | --- |
-| Draft-only tool interface | The agent cannot call a send endpoint through the exposed mailbox operations. | Google's OAuth scopes may still authorize sending to other holders of the same credentials. |
-| Human review | Generated drafts are not sent by the application. | A person must inspect them before deciding whether to send. |
-| Untrusted-input treatment | Incoming email text is data, never higher-priority instructions. | Heuristic injection detection cannot catch every malicious message. |
-| Deterministic business checks | Approved sponsorship terms and price limits come from configuration, not email instructions. | A human still needs to judge ambiguous financial or contractual offers. |
-| Offline-first execution | Tests and the default demo do not require live mailbox access. | Mocked tests are not evidence of full production reliability. |
-| Restricted HTML inspection | An optional Docker container has no network, no privileged access, and no mounted secrets. | It cannot visit arbitrary external websites; live browsing is not implemented. |
-| Draft recovery marker | An opaque marker on each app-created draft lets a restarted single worker find a draft created before a crash. | Concurrent workers are unsupported; Gmail visibility delays, manual draft deletion, or API outages can still require operator review. This is not exactly-once delivery. |
-
-**Gmail OAuth warning:** The Google `gmail.compose` and `gmail.modify` scopes can authorize sending email. The narrow application boundary removes send methods from this agent's interface, but it does not change Google's underlying OAuth permissions. Review the [official Gmail scope table](https://developers.google.com/workspace/gmail/api/auth/scopes) before connecting an account. For live experiments, use a dedicated test mailbox first. See [security details](docs/SECURITY.md).
-
-## ⚙️ Optional configuration and live Gmail
-
-Offline mode is the default. The following integrations are optional and must be explicitly configured.
-
-| Setting | Purpose | Default / note |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | Optional model provider credential | Unset; offline deterministic fallback works without it. |
-| `OPENAI_BASE_URL` | OpenAI-compatible chat completions endpoint | `https://api.openai.com/v1` |
-| `CLASSIFIER_MODEL` | Model used for classification | Unset; choose an actually available model ID. |
-| `DRAFTER_MODEL` | Model used for drafting | Unset; deterministic template fallback is available. |
-| `GMAIL_CREDENTIALS_PATH` | Local OAuth desktop client JSON | `credentials.json`; keep private. |
-| `GMAIL_TOKEN_PATH` | Local Gmail OAuth token JSON | `token.json`; keep private. |
-| `GMAIL_ENABLE_LABEL_MUTATION` | Permit Gmail label creation and updates | `false`; enabling adds `gmail.modify`, which can authorize sending. Labels are optional. |
-| `SPONSORSHIP_ENABLED` | Allow policy-controlled sponsorship drafting | `false` |
-| `SPONSORSHIP_APPROVED_TERMS` | Terms approved by a person | Empty by default. |
-| `SPONSORSHIP_MINIMUM_PRICE` | Minimum sponsorship offer for automated drafting | Unset by default. |
-
-Use [`.env.example`](.env.example) as a reference for environment variable names. The application reads process environment variables; it does not automatically load a `.env` file. Never commit credentials, OAuth tokens, or API keys.
-
-### Enabling Gmail intentionally
-
-1. Follow the [Windows Gmail setup guide](docs/SETUP_WINDOWS.md) to create a Google Cloud project, enable the Gmail API, and configure desktop OAuth.
-2. Install optional dependencies with `python -m pip install -e ".[gmail]"` (or use your virtual environment's Python).
-3. Set `GMAIL_CREDENTIALS_PATH` and `GMAIL_TOKEN_PATH` to private local files. By default the app requests `gmail.readonly` and `gmail.compose`; workflow labels are optional.
-4. Review the scope permissions before granting consent. Set `GMAIL_ENABLE_LABEL_MUTATION=true` only if you explicitly want label updates; this adds `gmail.modify`, which can authorize sending.
-5. In a dedicated test account, select one synthetic test message and execute `python -m secure_inbox.cli --live --message-id YOUR_TEST_MESSAGE_ID`.
-
-The live entry point requires one explicit Gmail message ID and never lists or processes the rest of the inbox. It can create a draft; workflow labels are optional. It does not start continuous polling or send messages. Production deployment and unattended processing need additional design and review; this project is a reference implementation, not a turnkey autonomous mailbox service.
-
-### Docker (optional)
-
-To build the offline HTML snapshot inspector when Docker Desktop's engine is running:
-
-~~~powershell
-docker build -t secure-inbox-html-inspector:local scripts/sandbox
 ~~~
 
-The inspector processes caller-provided HTML in a network-disabled container. It does not click email links or fetch remote webpages. Docker isn't required for the main demo or CI.
+See the [example README](examples/skill-acceptance-test/README.md) and [test source](examples/skill-acceptance-test/inbox.test.mjs). Example drafts remain pending human review; suspicious content receives no draft; duplicate input is skipped.
 
-### Plurai (optional)
+## Install and use the Codex skill
 
-The research references Plurai for AI-agent simulations. This repository has independent deterministic tests; it does not claim to have completed a live Plurai integration or evaluation.
+A Codex Agent Skill is a folder of instructions Codex can load for relevant work. The <code>SKILL.md</code> file defines the skill name, when to use it, and its workflow. The references cover [security](.agents/skills/secure-inbox-agent/references/security.md), [Gmail state and recovery](.agents/skills/secure-inbox-agent/references/gmail-workflow.md), and [adversarial tests](.agents/skills/secure-inbox-agent/references/testing.md).
 
-## 🗂️ Repository structure
+From the repository root, preview and install for your user across projects:
+
+~~~powershell
+.\.venv\Scripts\python.exe scripts\install_skill.py --user --dry-run
+.\.venv\Scripts\python.exe scripts\install_skill.py --user
+~~~
+
+Or install into a project only:
+
+~~~powershell
+.\.venv\Scripts\python.exe scripts\install_skill.py --project "C:\Projects\my-app" --dry-run
+.\.venv\Scripts\python.exe scripts\install_skill.py --project "C:\Projects\my-app"
+~~~
+
+A user installation normally lives under your user profile at <code>.agents/skills/secure-inbox-agent</code>; a project installation lives under that project's <code>.agents/skills/secure-inbox-agent</code>. The installer refuses to overwrite an existing copy. Back up an existing install before intentionally replacing it. Restart the Codex session after installation.
+
+In the target project, choose the skill from the <code>$</code> picker or type <code>$secure-inbox-agent</code>. Try one of these prompts:
+
+~~~text
+$secure-inbox-agent Build a small offline inbox assistant in this project.
+Use synthetic messages only, keep policy outside email content, expose
+human-reviewed drafts only, add deterministic tests, and run them. Never
+connect to Gmail or send email.
+~~~
+
+~~~text
+$secure-inbox-agent Audit this repository's inbox workflow for send
+capabilities, prompt injection, OAuth scope risks, sponsorship policy
+bypasses, retries, and missing human review. Use synthetic data and run
+the relevant tests. Cite concrete files and findings.
+~~~
+
+Skill discovery means Codex can see the skill; it does not prove a model-backed task ran. Verify an invocation by running a task in the target project, reviewing the resulting changes, and rerunning its tests. A working account-supported Codex model session is required. See [official Codex skills documentation](https://developers.openai.com/codex/skills/).
+
+## Hands-on guide and CI
+
+The [hands-on test guide](docs/TEST_IT_YOURSELF.md) covers a clean clone, Python checks, the Node example, project-local skill installation, and actual model-backed invocation evidence.
+
+GitHub Actions runs three independent jobs:
+
+| Job | Checks | Run locally |
+| --- | --- | --- |
+| <code>test</code> | Ruff, Python 3.11 and 3.12 tests, Python offline demo | Use the Python commands above. |
+| <code>docker-inspector</code> | Builds the restricted inspector container and runs its integration tests | Requires Docker Desktop/Engine; see [Docker instructions](docs/SETUP_WINDOWS.md#docker-html-snapshot-inspection). |
+| <code>node-acceptance</code> | Node acceptance tests and offline demo | Run <code>npm test</code> and <code>npm run demo</code> in <code>examples/skill-acceptance-test</code>. |
+
+See the [CI workflow](.github/workflows/ci.yml) and [latest workflow runs](https://github.com/YellankiKaushik/Skill-YT/actions/workflows/ci.yml). Test counts can change; use the linked runs for current results.
+
+## Security and limitations
+
+- Email body, sender, subject, attachments, and quoted content are untrusted data, not policy instructions. Deterministic checks and human review are defense in depth, not perfect prompt-injection protection.
+- The application exposes draft creation but no send operation. A human must inspect any live draft before deciding what to do with it.
+- Gmail is optional and disabled by default. Live CLI use requires <code>--live</code> and one explicit <code>--message-id</code>; it does not poll or process an entire mailbox.
+- Gmail OAuth permissions can be broader than the application's interface. Google lists <code>gmail.compose</code> and <code>gmail.modify</code> as restricted scopes, and they can authorize sending. Review the [official scope table](https://developers.google.com/workspace/gmail/api/auth/scopes) before connecting an account.
+- Recovery targets one worker; it is not distributed locking or exactly-once delivery.
+- Docker HTML inspection examines only a supplied snapshot. It has no network and does not fetch links or visit URLs.
+- Never commit OAuth client files, tokens, API keys, mailbox data, or <code>.env</code> secrets.
+
+See the detailed [security documentation](docs/SECURITY.md).
+
+## Optional integrations and verification status
+
+| Integration | Status | Needed for the offline demo? |
+| --- | --- | --- |
+| Gmail OAuth | Optional adapter; live Gmail has not been tested. Project checks use mocks. | No |
+| External AI model | Optional OpenAI-compatible provider; no live model request is verified. Deterministic fallback is available. | No |
+| Docker Desktop | Optional for local HTML inspection. The Docker integration runs in GitHub Actions. | No |
+| Plurai | Optional research; no integration or simulation is configured. | No |
+
+## Troubleshooting
+
+| Problem | What to try |
+| --- | --- |
+| Python launcher missing | Install Python 3.11+ and use <code>python -m venv .venv</code> instead of <code>py -3.11</code>. Reopen the terminal. |
+| Virtual environment fails | Run from the repository root. Use <code>.venv\Scripts\python.exe</code> directly; activation is unnecessary. |
+| Dependency install fails | Check network/proxy access to the package index, confirm Python 3.11+, and retry pip. The app has no mandatory third-party runtime dependencies. |
+| Node or npm missing | Install a supported Node.js LTS release and reopen the terminal. |
+| Skill does not appear | Confirm the installed <code>SKILL.md</code> exists, restart the Codex session, and check the skill picker. Discovery and invocation are separate. |
+| Codex model is unsupported | Choose an account-supported model in Codex and start a new task. Do not force an identifier rejected by the account. |
+| Docker engine unavailable | Start Docker Desktop/Engine before local Docker tests. The Python and Node demos do not need it; GitHub Actions runs the container test. |
+| Gmail credentials missing | Expected in offline mode. Do not add credentials for the default demo. See [Windows Gmail setup](docs/SETUP_WINDOWS.md) only if you intentionally choose live testing. |
+| Permission or network error | Check file permissions, proxy/firewall settings, and package/GitHub access. Do not weaken security controls to bypass them. |
+| Tests fail | Read the first failure, confirm you are in the repository or example folder, and capture the complete test output before opening an issue. |
+
+## Project structure
 
 ~~~text
 Skill-YT/
-├── .agents/skills/secure-inbox-agent/  # Reusable Codex skill and references
-├── .github/workflows/ci.yml          # Lint + tests + offline demo in CI
-├── docs/                             # Architecture, security, Windows setup
-├── scripts/                          # Skill installer and Docker assets
-├── dist/                             # Clean reusable skill distribution ZIP
-├── src/secure_inbox/                 # Python application modules
-├── tests/                            # Synthetic fixtures and tests
-├── .env.example                      # Environment variable reference
-├── pyproject.toml                    # Python package and test configuration
-├── VIDEO_RESEARCH.md                 # Research brief and provenance
-├── README.md                         # You are here
-└── LICENSE                           # MIT license
+├── .agents/skills/secure-inbox-agent/   # Codex skill and references
+├── .github/workflows/ci.yml            # Python, Docker, and Node CI
+├── docs/                               # Setup, architecture, security, test guides
+├── examples/skill-acceptance-test/     # Offline Node.js acceptance example
+├── scripts/                            # Skill installer and Docker inspector
+├── src/secure_inbox/                   # Python application
+├── tests/                              # Python tests and synthetic fixtures
+├── dist/                               # Reusable skill ZIP source
+├── pyproject.toml                      # Python package configuration
+├── VIDEO_RESEARCH.md                   # Original research brief and provenance
+├── README.md                           # Project overview and quick start
+└── LICENSE                             # MIT license
 ~~~
 
-## 🧪 Project status and verification
+## Release, license, and contributing
 
-| Area | Status |
-| --- | --- |
-| Python application / offline demo | 45 tests passed locally; Ruff, package dependency check, and offline demo passed. One real-Docker test is skipped on this machine and runs in the Docker CI job. |
-| Reusable Codex skill | Required `name`/`description` metadata and all references are present. The user-wide install matches the repository package; Codex prompt metadata exposes the skill. |
-| Cross-project offline acceptance | Project-local skill installation matched the package; an independent synthetic inbox example passed 3 tests. |
-| GitHub CI | Runs Ruff, pytest, the offline demo, and a real Docker inspector integration test. [View workflow status](https://github.com/YellankiKaushik/Skill-YT/actions/workflows/ci.yml). |
-| End-to-end live Codex invocation | Blocked before model execution: the configured `gpt-6.1-sol` model is unsupported for this ChatGPT sign-in. Skill discovery itself was confirmed. |
-| Live Gmail account | Not connected or tested. OAuth client/token are absent; the Gmail workflow is prepared for one explicitly selected Inbox message. |
-| Docker inspector | Local Docker engine is unavailable. GitHub Actions runs the real container integration test; see the release-readiness document for the result. |
-| External AI provider | Not tested; classifier and drafter model IDs are unset, so no external model request was made. |
-| Plurai | Official product documentation reviewed; no authorized integration or simulation run. |
+The published [v1.1.0 release](https://github.com/YellankiKaushik/Skill-YT/releases/tag/v1.1.0) contains the reusable skill ZIP. Clone the repository to run the application and examples. The release tag and asset are unchanged by documentation updates.
 
-This table distinguishes code that exists, tests that have run, and integrations not yet verified. It should not be read as a production security certification.
+This project is licensed under the [MIT License](LICENSE). To contribute, open an issue with a concise reproduction or submit a focused pull request. Before submitting, run the Python tests and Ruff, plus the Node tests/demo if you change that example. Use synthetic data only; never attach real messages, OAuth files, tokens, API keys, or mailbox screenshots.
 
-<a id="documentation"></a>
-
-## 📚 Documentation
-
-- [Windows setup](docs/SETUP_WINDOWS.md) — Python, OAuth, optional model provider, and Docker prerequisites.
-- [Architecture](docs/ARCHITECTURE.md) — Components, data flow, and single-worker behavior.
-- [Security model](docs/SECURITY.md) — Trust boundaries, OAuth limitations, and threat checklist.
-- [Codex skill definition](.agents/skills/secure-inbox-agent/SKILL.md) — The portable `secure-inbox-agent` instructions.
-- [Release readiness](docs/RELEASE_READINESS.md) — Verification scope, live integration prerequisites, and remaining limits.
-- [Video research brief](VIDEO_RESEARCH.md) — Design input and identified assumptions.
-- [Official Codex skills documentation](https://developers.openai.com/codex/skills/) — How Codex discovers and uses skills.
-
-### About the original tutorial
-
-This project grew out of a research exercise based on *My Workflow For Building AI Agents Securely*. The supplied [`VIDEO_RESEARCH.md`](VIDEO_RESEARCH.md) informed the design. The actual video transcript and specific timestamped claims were not independently verified during implementation, so this repository documents a defensible interpretation rather than claiming a line-by-line reproduction of the creator's private system.
-
-## 🤝 Contributing
-
-Bug reports, documentation improvements, and focused pull requests are welcome. For changes affecting Gmail permissions, draft persistence, live browsing, or model prompts, include tests and describe any change to the trust boundary. Run the project tests and Ruff before opening a PR.
-
-Please do not include real email content, tokens, OAuth client secrets, API keys, or personal mailbox screenshots in issues or pull requests.
-
-## 📄 License
-
-Released under the [MIT License](LICENSE).
-
-<div align="center">
-
-<strong>Build useful AI agents. Keep the human in control.</strong>
-
-<a href="#top">⬆ Back to top</a>
-
-</div>
+The original research brief is in [VIDEO_RESEARCH.md](VIDEO_RESEARCH.md). It informed the project design; tutorial-specific transcript claims and timestamps were not independently verified. For more detail, see [Windows setup](docs/SETUP_WINDOWS.md), [architecture](docs/ARCHITECTURE.md), and [release readiness](docs/RELEASE_READINESS.md).
