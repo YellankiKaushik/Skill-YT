@@ -1,0 +1,367 @@
+1
+00:00:00,267 --> 00:00:03,767
+A message can be a customer question, a sponsorship
+
+2
+00:00:03,767 --> 00:00:06,867
+offer, or text aimed at the assistant itself.
+
+3
+00:00:07,000 --> 00:00:09,900
+The inbox cannot tell you which one to trust.
+
+4
+00:00:11,267 --> 00:00:15,967
+If an assistant treats the email as instructions, the sender may steer it.
+
+5
+00:00:16,100 --> 00:00:19,500
+A subject line, quoted reply, attachment, or
+
+6
+00:00:19,500 --> 00:00:22,533
+link can all contain untrusted content.
+
+7
+00:00:23,267 --> 00:00:27,667
+An assistant with broad mailbox access could act on a bad decision.
+
+8
+00:00:27,800 --> 00:00:31,600
+Skill Y T makes the permitted actions explicit and keeps
+
+9
+00:00:31,600 --> 00:00:34,700
+the send operation outside the agent boundary.
+
+10
+00:00:35,267 --> 00:00:39,000
+Skill Y T is an open-source reference project.
+
+11
+00:00:39,133 --> 00:00:43,133
+It includes a Python application, a reusable Codex skill,
+
+12
+00:00:43,133 --> 00:00:46,700
+and a separate Node example you can run on its own.
+
+13
+00:00:47,267 --> 00:00:49,933
+The Python application is the main reference.
+
+14
+00:00:50,033 --> 00:00:52,600
+Run the command line demo and it builds a tiny
+
+15
+00:00:52,600 --> 00:00:55,133
+synthetic inbox with three distinct messages.
+
+16
+00:00:55,267 --> 00:00:57,733
+It prints the workflow results as JSON.
+
+17
+00:00:58,267 --> 00:01:01,467
+The Node acceptance example is separate from Python.
+
+18
+00:01:01,600 --> 00:01:05,633
+Its fixtures illustrate the same safety goals using Node built-ins.
+
+19
+00:01:05,733 --> 00:01:09,700
+The Codex skill takes those principles into another repository.
+
+20
+00:01:10,267 --> 00:01:13,267
+The agent reads a message, classifies it, and applies
+
+21
+00:01:13,267 --> 00:01:15,667
+deterministic safeguards before it drafts.
+
+22
+00:01:15,767 --> 00:01:19,933
+For example, a prompt injection match overrides the classifier’s decision.
+
+23
+00:01:20,033 --> 00:01:21,700
+Policy stays in code.
+
+24
+00:01:22,267 --> 00:01:25,100
+The first message asks about the recipient’s work.
+
+25
+00:01:25,233 --> 00:01:28,633
+The offline application creates a simple acknowledgment.
+
+26
+00:01:28,767 --> 00:01:30,667
+That draft is stored in memory.
+
+27
+00:01:30,767 --> 00:01:33,733
+A person still decides what to do with the reply.
+
+28
+00:01:34,267 --> 00:01:36,667
+The second message asks about a sponsorship.
+
+29
+00:01:36,767 --> 00:01:39,533
+Sponsorship drafting requires approved terms, an
+
+30
+00:01:39,533 --> 00:01:41,833
+explicit enable flag, and a price floor.
+
+31
+00:01:41,933 --> 00:01:44,533
+The default Python demo has no configured terms
+
+32
+00:01:44,533 --> 00:01:46,700
+or floor, so the message goes to review.
+
+33
+00:01:47,267 --> 00:01:50,000
+The third fixture urges the reader to verify an
+
+34
+00:01:50,000 --> 00:01:52,667
+account and attempts to override instructions.
+
+35
+00:01:52,767 --> 00:01:57,100
+The demo detects the prompt injection and creates no draft for that message.
+
+36
+00:01:57,233 --> 00:01:59,733
+Pattern checks help catch common cases.
+
+37
+00:02:00,267 --> 00:02:03,833
+The optional Gmail adapter is outside the offline demo.
+
+38
+00:02:03,933 --> 00:02:07,867
+At the provider level, Compose and Modify scopes can authorize sending.
+
+39
+00:02:07,967 --> 00:02:12,700
+Inside Skill Y T, the agent gets a narrower interface with no send method.
+
+40
+00:02:13,267 --> 00:02:15,933
+The agent gets explicitly allowed operations, and the
+
+41
+00:02:15,933 --> 00:02:18,400
+underlying Gmail client stays inside the adapter.
+
+42
+00:02:18,500 --> 00:02:21,000
+Model instructions also treat email as data.
+
+43
+00:02:21,100 --> 00:02:24,733
+Human review remains the last checkpoint before any real outbound mail.
+
+44
+00:02:25,267 --> 00:02:27,633
+The demo skips repeat message IDs.
+
+45
+00:02:27,767 --> 00:02:31,000
+In the optional single worker Gmail flow, draft creation
+
+46
+00:02:31,000 --> 00:02:34,000
+stores an opaque marker derived from the message ID.
+
+47
+00:02:34,100 --> 00:02:37,700
+A retry can look up that marker and recover the existing draft.
+
+48
+00:02:38,267 --> 00:02:39,800
+Labels are workflow state.
+
+49
+00:02:39,900 --> 00:02:41,700
+They provide no transactional lock.
+
+50
+00:02:41,800 --> 00:02:44,333
+Multiple workers, delayed Gmail visibility, or a
+
+51
+00:02:44,333 --> 00:02:46,533
+deleted draft can require manual handling.
+
+52
+00:02:46,633 --> 00:02:49,733
+Prompt injection matching also remains one layer of defense.
+
+53
+00:02:50,267 --> 00:02:54,333
+The repository includes a skill called Secure Inbox Agent.
+
+54
+00:02:54,433 --> 00:02:58,133
+Its Skill dot M D file gives Codex a reusable workflow
+
+55
+00:02:58,133 --> 00:03:01,000
+for building or auditing inbox assistants.
+
+56
+00:03:01,100 --> 00:03:04,700
+It carries design guidance and links to testing references.
+
+57
+00:03:05,267 --> 00:03:09,467
+The skill directs a developer to trace mailbox operations, verify that
+
+58
+00:03:09,467 --> 00:03:13,267
+policy decisions happen in code, and inspect recovery behavior.
+
+59
+00:03:13,400 --> 00:03:16,733
+It calls for synthetic fixtures that exercise uncertainty,
+
+60
+00:03:16,733 --> 00:03:19,700
+malicious input, duplicates, and prohibited actions.
+
+61
+00:03:20,267 --> 00:03:24,000
+The installer can copy the skill into a disposable project.
+
+62
+00:03:24,100 --> 00:03:27,800
+Open that project in Codex and invoke the skill by name.
+
+63
+00:03:27,933 --> 00:03:31,000
+Installation was checked during the project closeout.
+
+64
+00:03:31,133 --> 00:03:34,700
+A separate model-backed invocation remains unverified.
+
+65
+00:03:35,267 --> 00:03:38,367
+This excerpt is from the real Python demo.
+
+66
+00:03:38,500 --> 00:03:40,733
+The first ID is drafted.
+
+67
+00:03:40,867 --> 00:03:42,700
+The next two need review.
+
+68
+00:03:42,833 --> 00:03:47,833
+The draft count is one and the send operation available flag is false.
+
+69
+00:03:49,267 --> 00:03:52,033
+The demo runs the same inbox twice.
+
+70
+00:03:52,167 --> 00:03:56,267
+On the second pass, all three IDs are marked duplicate skipped.
+
+71
+00:03:56,367 --> 00:03:59,000
+The injection detected flag is true.
+
+72
+00:03:59,100 --> 00:04:01,733
+These results come from synthetic data.
+
+73
+00:04:02,267 --> 00:04:07,133
+Run npm test and npm run demo in the independent Node example.
+
+74
+00:04:07,267 --> 00:04:08,900
+Twelve tests passed.
+
+75
+00:04:09,000 --> 00:04:12,367
+The Node demo creates two pending acknowledgments, holds the
+
+76
+00:04:12,367 --> 00:04:15,700
+suspicious message without a draft, and skips the duplicate.
+
+77
+00:04:16,267 --> 00:04:18,800
+Local Python checks passed forty-five tests and
+
+78
+00:04:18,800 --> 00:04:21,300
+skipped the dedicated Docker integration test.
+
+79
+00:04:21,400 --> 00:04:24,100
+GitHub Actions passed Python on two versions, the
+
+80
+00:04:24,100 --> 00:04:26,833
+actual Docker inspector job, and Node acceptance.
+
+81
+00:04:26,933 --> 00:04:29,700
+These runs did not use a live Gmail mailbox.
+
+82
+00:04:30,267 --> 00:04:32,633
+Clone Skill Y T, create a Python virtual
+
+83
+00:04:32,633 --> 00:04:35,033
+environment, and install the test extra.
+
+84
+00:04:35,133 --> 00:04:36,967
+Run the Python command shown here.
+
+85
+00:04:37,067 --> 00:04:39,733
+The hands-on guide walks through the same sequence.
+
+86
+00:04:40,267 --> 00:04:43,300
+The testing guide connects the Python demo, the Node
+
+87
+00:04:43,300 --> 00:04:45,867
+suite, and project-local skill installation.
+
+88
+00:04:45,967 --> 00:04:49,700
+Use your own run output to check the documented behavior.
+
+89
+00:04:50,267 --> 00:04:51,933
+Skill Y T is open source.
+
+90
+00:04:52,033 --> 00:04:54,400
+Start with the synthetic demo, inspect the boundaries,
+
+91
+00:04:54,400 --> 00:04:56,300
+and adapt the workflow to your own project.
+
+92
+00:04:56,367 --> 00:04:59,733
+The repository and version one point one release are on GitHub.

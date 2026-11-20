@@ -1,0 +1,827 @@
+{
+  "Trailer": [
+    {
+      "text": "Your inbox receives instructions.",
+      "startMs": 250,
+      "endMs": 2722,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Should an AI trust them?",
+      "startMs": 2842,
+      "endMs": 4694,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "An email can try to override the assistant.",
+      "startMs": 5250,
+      "endMs": 7670,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T flags suspicious language and routes the message to review.",
+      "startMs": 7770,
+      "endMs": 11695,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T reads a synthetic inbox, classifies",
+      "startMs": 12250,
+      "endMs": 14916,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "messages, and applies rules in code.",
+      "startMs": 14916,
+      "endMs": 17049,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Eligible inquiries become acknowledgment drafts.",
+      "startMs": 17145,
+      "endMs": 19704,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Other messages wait for review.",
+      "startMs": 19799,
+      "endMs": 21697,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The agent can prepare a reply.",
+      "startMs": 22250,
+      "endMs": 24319,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "A person decides what to do with it.",
+      "startMs": 24425,
+      "endMs": 26605,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "There is no send operation in the agent interface.",
+      "startMs": 26711,
+      "endMs": 29711,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The offline run created one draft.",
+      "startMs": 30250,
+      "endMs": 32016,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Local checks passed forty-five Python tests and twelve Node tests.",
+      "startMs": 32100,
+      "endMs": 35144,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The dedicated Docker job passed in GitHub Actions.",
+      "startMs": 35227,
+      "endMs": 37696,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Secure Inbox AI Agent.",
+      "startMs": 38250,
+      "endMs": 40700,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Explore the source and reproduce the demo on GitHub.",
+      "startMs": 40830,
+      "endMs": 44555,
+      "timestampMs": null,
+      "confidence": null
+    }
+  ],
+  "Explainer": [
+    {
+      "text": "A message can be a customer question, a sponsorship",
+      "startMs": 250,
+      "endMs": 3756,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "offer, or text aimed at the assistant itself.",
+      "startMs": 3756,
+      "endMs": 6850,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The inbox cannot tell you which one to trust.",
+      "startMs": 6980,
+      "endMs": 9880,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "If an assistant treats the email as instructions, the sender may steer it.",
+      "startMs": 11250,
+      "endMs": 15950,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "A subject line, quoted reply, attachment, or",
+      "startMs": 16080,
+      "endMs": 19486,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "link can all contain untrusted content.",
+      "startMs": 19486,
+      "endMs": 22505,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "An assistant with broad mailbox access could act on a bad decision.",
+      "startMs": 23250,
+      "endMs": 27655,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T makes the permitted actions explicit and keeps",
+      "startMs": 27775,
+      "endMs": 31575,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "the send operation outside the agent boundary.",
+      "startMs": 31575,
+      "endMs": 34697,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T is an open-source reference project.",
+      "startMs": 35250,
+      "endMs": 38986,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "It includes a Python application, a reusable Codex skill,",
+      "startMs": 39114,
+      "endMs": 43107,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "and a separate Node example you can run on its own.",
+      "startMs": 43107,
+      "endMs": 46680,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The Python application is the main reference.",
+      "startMs": 47250,
+      "endMs": 49910,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Run the command line demo and it builds a tiny",
+      "startMs": 50016,
+      "endMs": 52600,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "synthetic inbox with three distinct messages.",
+      "startMs": 52600,
+      "endMs": 55128,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "It prints the workflow results as JSON.",
+      "startMs": 55234,
+      "endMs": 57704,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The Node acceptance example is separate from Python.",
+      "startMs": 58250,
+      "endMs": 61457,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Its fixtures illustrate the same safety goals using Node built-ins.",
+      "startMs": 61568,
+      "endMs": 65619,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The Codex skill takes those principles into another repository.",
+      "startMs": 65730,
+      "endMs": 69697,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The agent reads a message, classifies it, and applies",
+      "startMs": 70250,
+      "endMs": 73256,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "deterministic safeguards before it drafts.",
+      "startMs": 73256,
+      "endMs": 75639,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "For example, a prompt injection match overrides the classifier’s decision.",
+      "startMs": 75746,
+      "endMs": 79917,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Policy stays in code.",
+      "startMs": 80024,
+      "endMs": 81688,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The first message asks about the recipient’s work.",
+      "startMs": 82250,
+      "endMs": 85095,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The offline application creates a simple acknowledgment.",
+      "startMs": 85206,
+      "endMs": 88626,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "That draft is stored in memory.",
+      "startMs": 88737,
+      "endMs": 90640,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "A person still decides what to do with the reply.",
+      "startMs": 90751,
+      "endMs": 93704,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The second message asks about a sponsorship.",
+      "startMs": 94250,
+      "endMs": 96660,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Sponsorship drafting requires approved terms, an",
+      "startMs": 96763,
+      "endMs": 99526,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "explicit enable flag, and a price floor.",
+      "startMs": 99526,
+      "endMs": 101829,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The default Python demo has no configured terms",
+      "startMs": 101932,
+      "endMs": 104506,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "or floor, so the message goes to review.",
+      "startMs": 104506,
+      "endMs": 106697,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The third fixture urges the reader to verify an",
+      "startMs": 107250,
+      "endMs": 109981,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "account and attempts to override instructions.",
+      "startMs": 109981,
+      "endMs": 112654,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The demo detects the prompt injection and creates no draft for that message.",
+      "startMs": 112765,
+      "endMs": 117096,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Pattern checks help catch common cases.",
+      "startMs": 117207,
+      "endMs": 119703,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The optional Gmail adapter is outside the offline demo.",
+      "startMs": 120250,
+      "endMs": 123802,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "At the provider level, Compose and Modify scopes can authorize sending.",
+      "startMs": 123909,
+      "endMs": 127848,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Inside Skill Y T, the agent gets a narrower interface with no send method.",
+      "startMs": 127954,
+      "endMs": 132691,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The agent gets explicitly allowed operations, and the",
+      "startMs": 133250,
+      "endMs": 135914,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "underlying Gmail client stays inside the adapter.",
+      "startMs": 135914,
+      "endMs": 138377,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Model instructions also treat email as data.",
+      "startMs": 138468,
+      "endMs": 140984,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Human review remains the last checkpoint before any real outbound mail.",
+      "startMs": 141076,
+      "endMs": 144710,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The demo skips repeat message IDs.",
+      "startMs": 145250,
+      "endMs": 147630,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "In the optional single worker Gmail flow, draft creation",
+      "startMs": 147735,
+      "endMs": 150976,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "stores an opaque marker derived from the message ID.",
+      "startMs": 150976,
+      "endMs": 153986,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "A retry can look up that marker and recover the existing draft.",
+      "startMs": 154092,
+      "endMs": 157689,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Labels are workflow state.",
+      "startMs": 158250,
+      "endMs": 159792,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "They provide no transactional lock.",
+      "startMs": 159882,
+      "endMs": 161691,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Multiple workers, delayed Gmail visibility, or a",
+      "startMs": 161781,
+      "endMs": 164311,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "deleted draft can require manual handling.",
+      "startMs": 164311,
+      "endMs": 166525,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Prompt injection matching also remains one layer of defense.",
+      "startMs": 166615,
+      "endMs": 169705,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The repository includes a skill called Secure Inbox Agent.",
+      "startMs": 170250,
+      "endMs": 174302,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Its Skill dot M D file gives Codex a reusable workflow",
+      "startMs": 174418,
+      "endMs": 178108,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "for building or auditing inbox assistants.",
+      "startMs": 178108,
+      "endMs": 180977,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "It carries design guidance and links to testing references.",
+      "startMs": 181094,
+      "endMs": 184699,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The skill directs a developer to trace mailbox operations, verify that",
+      "startMs": 185250,
+      "endMs": 189466,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "policy decisions happen in code, and inspect recovery behavior.",
+      "startMs": 189466,
+      "endMs": 193261,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "It calls for synthetic fixtures that exercise uncertainty,",
+      "startMs": 193371,
+      "endMs": 196701,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "malicious input, duplicates, and prohibited actions.",
+      "startMs": 196701,
+      "endMs": 199685,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The installer can copy the skill into a disposable project.",
+      "startMs": 200250,
+      "endMs": 203983,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Open that project in Codex and invoke the skill by name.",
+      "startMs": 204096,
+      "endMs": 207790,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Installation was checked during the project closeout.",
+      "startMs": 207903,
+      "endMs": 210993,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "A separate model-backed invocation remains unverified.",
+      "startMs": 211105,
+      "endMs": 214695,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "This excerpt is from the real Python demo.",
+      "startMs": 215250,
+      "endMs": 218350,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The first ID is drafted.",
+      "startMs": 218480,
+      "endMs": 220705,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The next two need review.",
+      "startMs": 220835,
+      "endMs": 222685,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The draft count is one and the send operation available flag is false.",
+      "startMs": 222815,
+      "endMs": 227815,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The demo runs the same inbox twice.",
+      "startMs": 229250,
+      "endMs": 232029,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "On the second pass, all three IDs are marked duplicate skipped.",
+      "startMs": 232148,
+      "endMs": 236238,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The injection detected flag is true.",
+      "startMs": 236357,
+      "endMs": 238981,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "These results come from synthetic data.",
+      "startMs": 239100,
+      "endMs": 241701,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Run npm test and npm run demo in the independent Node example.",
+      "startMs": 242250,
+      "endMs": 247131,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Twelve tests passed.",
+      "startMs": 247243,
+      "endMs": 248883,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The Node demo creates two pending acknowledgments, holds the",
+      "startMs": 248995,
+      "endMs": 252347,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "suspicious message without a draft, and skips the duplicate.",
+      "startMs": 252347,
+      "endMs": 255700,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Local Python checks passed forty-five tests and",
+      "startMs": 256250,
+      "endMs": 258786,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "skipped the dedicated Docker integration test.",
+      "startMs": 258786,
+      "endMs": 261269,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "GitHub Actions passed Python on two versions, the",
+      "startMs": 261368,
+      "endMs": 264095,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "actual Docker inspector job, and Node acceptance.",
+      "startMs": 264095,
+      "endMs": 266821,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "These runs did not use a live Gmail mailbox.",
+      "startMs": 266921,
+      "endMs": 269688,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Clone Skill Y T, create a Python virtual",
+      "startMs": 270250,
+      "endMs": 272627,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "environment, and install the test extra.",
+      "startMs": 272627,
+      "endMs": 275005,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Run the Python command shown here.",
+      "startMs": 275106,
+      "endMs": 276960,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The hands-on guide walks through the same sequence.",
+      "startMs": 277062,
+      "endMs": 279705,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The testing guide connects the Python demo, the Node",
+      "startMs": 280250,
+      "endMs": 283279,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "suite, and project-local skill installation.",
+      "startMs": 283279,
+      "endMs": 285843,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Use your own run output to check the documented behavior.",
+      "startMs": 285957,
+      "endMs": 289690,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T is open source.",
+      "startMs": 290250,
+      "endMs": 291927,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Start with the synthetic demo, inspect the boundaries,",
+      "startMs": 292018,
+      "endMs": 294386,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "and adapt the workflow to your own project.",
+      "startMs": 294386,
+      "endMs": 296271,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The repository and version one point one release are on GitHub.",
+      "startMs": 296362,
+      "endMs": 299709,
+      "timestampMs": null,
+      "confidence": null
+    }
+  ],
+  "Vertical": [
+    {
+      "text": "An incoming email can contain",
+      "startMs": 250,
+      "endMs": 2230,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "instructions aimed at the assistant.",
+      "startMs": 2230,
+      "endMs": 4689,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Skill Y T checks for suspicious language",
+      "startMs": 5250,
+      "endMs": 7691,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "and holds the message for review.",
+      "startMs": 7691,
+      "endMs": 9705,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Classification and fixed rules decide",
+      "startMs": 10250,
+      "endMs": 12843,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "what gets an acknowledgment draft.",
+      "startMs": 12843,
+      "endMs": 15225,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "People decide what happens next.",
+      "startMs": 16250,
+      "endMs": 18829,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "The agent has no send operation.",
+      "startMs": 18958,
+      "endMs": 21686,
+      "timestampMs": null,
+      "confidence": null
+    },
+    {
+      "text": "Find Skill Y T on GitHub and run the offline demo.",
+      "startMs": 22250,
+      "endMs": 26375,
+      "timestampMs": null,
+      "confidence": null
+    }
+  ]
+}

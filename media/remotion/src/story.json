@@ -1,0 +1,304 @@
+{
+  "Trailer": [
+    {
+      "d": 5,
+      "kind": "inbox",
+      "k": "THE INBOX",
+      "title": "Who gets to give orders?",
+      "sub": "Every message arrives as data.",
+      "voice": "Your inbox receives instructions. Should an AI trust them?"
+    },
+    {
+      "d": 7,
+      "kind": "gate",
+      "k": "TRUST BOUNDARY",
+      "title": "Treat email as untrusted.",
+      "sub": "Suspicious content routes to review.",
+      "voice": "An email can try to override the assistant. Skill Y T flags suspicious language and routes the message to review."
+    },
+    {
+      "d": 10,
+      "kind": "pipeline",
+      "k": "THE PROCESS",
+      "title": "Read. Classify. Check policy.",
+      "sub": "Draft only when eligible.",
+      "voice": "Skill Y T reads a synthetic inbox, classifies messages, and applies rules in code. Eligible inquiries become acknowledgment drafts. Other messages wait for review."
+    },
+    {
+      "d": 8,
+      "kind": "draft",
+      "k": "HUMAN CHECKPOINT",
+      "title": "A draft is where it stops.",
+      "sub": "No agent-accessible send operation.",
+      "voice": "The agent can prepare a reply. A person decides what to do with it. There is no send operation in the agent interface."
+    },
+    {
+      "d": 8,
+      "kind": "terminal",
+      "k": "RUN VERIFIED",
+      "title": "Test the boundary.",
+      "sub": "Python, Node.js and GitHub Actions.",
+      "voice": "The offline run created one draft. Local checks passed forty-five Python tests and twelve Node tests. The dedicated Docker job passed in GitHub Actions.",
+      "detail": "trailer"
+    },
+    {
+      "d": 7,
+      "kind": "close",
+      "k": "OPEN SOURCE",
+      "title": "Secure Inbox AI Agent",
+      "sub": "Offline-first. Security-focused.",
+      "voice": "Secure Inbox AI Agent. Explore the source and reproduce the demo on GitHub."
+    }
+  ],
+  "Explainer": [
+    {
+      "d": 11,
+      "kind": "inbox",
+      "k": "01 / THE PROBLEM",
+      "title": "An inbox is untrusted input.",
+      "sub": "Think of each email as data crossing a boundary.",
+      "voice": "A message can be a customer question, a sponsorship offer, or text aimed at the assistant itself. The inbox cannot tell you which one to trust."
+    },
+    {
+      "d": 12,
+      "kind": "gate",
+      "k": "01 / THE PROBLEM",
+      "title": "An email cannot set policy.",
+      "sub": "Prompt injection tries to change the assistant’s instructions.",
+      "voice": "If an assistant treats the email as instructions, the sender may steer it. A subject line, quoted reply, attachment, or link can all contain untrusted content."
+    },
+    {
+      "d": 12,
+      "kind": "boundary",
+      "k": "01 / THE PROBLEM",
+      "title": "Constrain what AI can do.",
+      "sub": "Separate message data from mailbox permissions.",
+      "voice": "An assistant with broad mailbox access could act on a bad decision. Skill Y T makes the permitted actions explicit and keeps the send operation outside the agent boundary."
+    },
+    {
+      "d": 12,
+      "kind": "ecosystem",
+      "k": "02 / WHAT WE BUILT",
+      "title": "One idea, three entry points.",
+      "sub": "Python app · Codex skill · Node.js example",
+      "voice": "Skill Y T is an open-source reference project. It includes a Python application, a reusable Codex skill, and a separate Node example you can run on its own.",
+      "detail": "all"
+    },
+    {
+      "d": 11,
+      "kind": "inbox",
+      "k": "02 / WHAT WE BUILT",
+      "title": "Start with the Python app.",
+      "sub": "The default demo uses synthetic messages in memory.",
+      "voice": "The Python application is the main reference. Run the command line demo and it builds a tiny synthetic inbox with three distinct messages. It prints the workflow results as JSON."
+    },
+    {
+      "d": 12,
+      "kind": "ecosystem",
+      "k": "02 / WHAT WE BUILT",
+      "title": "Try the smaller Node example.",
+      "sub": "Independent fixtures and tests. Node built-ins only.",
+      "voice": "The Node acceptance example is separate from Python. Its fixtures illustrate the same safety goals using Node built-ins. The Codex skill takes those principles into another repository.",
+      "detail": "node"
+    },
+    {
+      "d": 12,
+      "kind": "pipeline",
+      "k": "03 / THE PIPELINE",
+      "title": "Read. Classify. Check policy.",
+      "sub": "Eligible messages become drafts. Others go to review.",
+      "voice": "The agent reads a message, classifies it, and applies deterministic safeguards before it drafts. For example, a prompt injection match overrides the classifier’s decision. Policy stays in code."
+    },
+    {
+      "d": 12,
+      "kind": "case",
+      "k": "03 / THE PIPELINE",
+      "title": "A routine question gets a draft.",
+      "sub": "Python fixture demo-1",
+      "voice": "The first message asks about the recipient’s work. The offline application creates a simple acknowledgment. That draft is stored in memory. A person still decides what to do with the reply.",
+      "detail": "normal"
+    },
+    {
+      "d": 13,
+      "kind": "case",
+      "k": "03 / THE PIPELINE",
+      "title": "A sponsorship gets held.",
+      "sub": "Python fixture demo-2",
+      "voice": "The second message asks about a sponsorship. Sponsorship drafting requires approved terms, an explicit enable flag, and a price floor. The default Python demo has no configured terms or floor, so the message goes to review.",
+      "detail": "sponsor"
+    },
+    {
+      "d": 13,
+      "kind": "case",
+      "k": "03 / THE PIPELINE",
+      "title": "Suspicious content goes to review.",
+      "sub": "Python fixture demo-3",
+      "voice": "The third fixture urges the reader to verify an account and attempts to override instructions. The demo detects the prompt injection and creates no draft for that message. Pattern checks help catch common cases.",
+      "detail": "attack"
+    },
+    {
+      "d": 13,
+      "kind": "boundary",
+      "k": "04 / SECURITY ARCHITECTURE",
+      "title": "OAuth and the agent are separate.",
+      "sub": "Provider scope ≠ agent capability",
+      "voice": "The optional Gmail adapter is outside the offline demo. At the provider level, Compose and Modify scopes can authorize sending. Inside Skill Y T, the agent gets a narrower interface with no send method."
+    },
+    {
+      "d": 12,
+      "kind": "draft",
+      "k": "04 / SECURITY ARCHITECTURE",
+      "title": "A person decides.",
+      "sub": "Draft creation stops at the application boundary.",
+      "voice": "The agent gets explicitly allowed operations, and the underlying Gmail client stays inside the adapter. Model instructions also treat email as data. Human review remains the last checkpoint before any real outbound mail."
+    },
+    {
+      "d": 13,
+      "kind": "recovery",
+      "k": "04 / SECURITY ARCHITECTURE",
+      "title": "Recover a draft after restart.",
+      "sub": "Find the saved draft by its operation marker.",
+      "voice": "The demo skips repeat message IDs. In the optional single worker Gmail flow, draft creation stores an opaque marker derived from the message ID. A retry can look up that marker and recover the existing draft."
+    },
+    {
+      "d": 12,
+      "kind": "recovery",
+      "k": "04 / SECURITY ARCHITECTURE",
+      "title": "Recovery has limits.",
+      "sub": "Single-worker flow. No distributed exactly-once guarantee.",
+      "voice": "Labels are workflow state. They provide no transactional lock. Multiple workers, delayed Gmail visibility, or a deleted draft can require manual handling. Prompt injection matching also remains one layer of defense.",
+      "detail": "limits"
+    },
+    {
+      "d": 15,
+      "kind": "skill",
+      "k": "05 / THE CODEX SKILL",
+      "title": "Take the workflow with you.",
+      "sub": ".agents/skills/secure-inbox-agent/SKILL.md",
+      "voice": "The repository includes a skill called Secure Inbox Agent. Its Skill dot M D file gives Codex a reusable workflow for building or auditing inbox assistants. It carries design guidance and links to testing references.",
+      "detail": "file"
+    },
+    {
+      "d": 15,
+      "kind": "skill",
+      "k": "05 / THE CODEX SKILL",
+      "title": "Audit the capability boundary.",
+      "sub": "Trace tools, state and policy. Then test the edges.",
+      "voice": "The skill directs a developer to trace mailbox operations, verify that policy decisions happen in code, and inspect recovery behavior. It calls for synthetic fixtures that exercise uncertainty, malicious input, duplicates, and prohibited actions.",
+      "detail": "audit"
+    },
+    {
+      "d": 15,
+      "kind": "skill",
+      "k": "05 / THE CODEX SKILL",
+      "title": "Try it in a separate project.",
+      "sub": "Invoke $secure-inbox-agent in a supported Codex session.",
+      "voice": "The installer can copy the skill into a disposable project. Open that project in Codex and invoke the skill by name. Installation was checked during the project closeout. A separate model-backed invocation remains unverified.",
+      "detail": "invoke"
+    },
+    {
+      "d": 14,
+      "kind": "terminal",
+      "k": "06 / OBSERVED OUTPUT",
+      "title": "Run the Python demo.",
+      "sub": "python -m secure_inbox.cli",
+      "voice": "This excerpt is from the real Python demo. The first ID is drafted. The next two need review. The draft count is one and the send operation available flag is false.",
+      "detail": "python"
+    },
+    {
+      "d": 13,
+      "kind": "terminal",
+      "k": "06 / OBSERVED OUTPUT",
+      "title": "Repeat the run.",
+      "sub": "Three duplicate_skipped outcomes",
+      "voice": "The demo runs the same inbox twice. On the second pass, all three IDs are marked duplicate skipped. The injection detected flag is true. These results come from synthetic data.",
+      "detail": "duplicate"
+    },
+    {
+      "d": 14,
+      "kind": "terminal",
+      "k": "06 / VERIFIED CHECKS",
+      "title": "Run the Node acceptance suite.",
+      "sub": "npm test  ·  npm run demo",
+      "voice": "Run npm test and npm run demo in the independent Node example. Twelve tests passed. The Node demo creates two pending acknowledgments, holds the suspicious message without a draft, and skips the duplicate.",
+      "detail": "node"
+    },
+    {
+      "d": 14,
+      "kind": "terminal",
+      "k": "06 / VERIFIED CHECKS",
+      "title": "Check GitHub Actions.",
+      "sub": "Local Python: 45 passed, 1 skipped · Ruff passed",
+      "voice": "Local Python checks passed forty-five tests and skipped the dedicated Docker integration test. GitHub Actions passed Python on two versions, the actual Docker inspector job, and Node acceptance. These runs did not use a live Gmail mailbox.",
+      "detail": "ci"
+    },
+    {
+      "d": 10,
+      "kind": "walk",
+      "k": "07 / TRY IT",
+      "title": "Clone and run it locally.",
+      "sub": "Start with the README quick start.",
+      "voice": "Clone Skill Y T, create a Python virtual environment, and install the test extra. Run the Python command shown here. The hands-on guide walks through the same sequence.",
+      "detail": "python"
+    },
+    {
+      "d": 10,
+      "kind": "walk",
+      "k": "07 / TRY IT",
+      "title": "Reproduce all three paths.",
+      "sub": "docs/TEST_IT_YOURSELF.md",
+      "voice": "The testing guide connects the Python demo, the Node suite, and project-local skill installation. Use your own run output to check the documented behavior.",
+      "detail": "guide"
+    },
+    {
+      "d": 10,
+      "kind": "close",
+      "k": "08 / OPEN SOURCE",
+      "title": "Secure Inbox AI Agent",
+      "sub": "Offline-first reference implementation",
+      "voice": "Skill Y T is open source. Start with the synthetic demo, inspect the boundaries, and adapt the workflow to your own project. The repository and version one point one release are on GitHub."
+    }
+  ],
+  "Vertical": [
+    {
+      "d": 5,
+      "kind": "inbox",
+      "k": "UNTRUSTED INPUT",
+      "title": "Can AI trust your inbox?",
+      "sub": "Every message arrives as data.",
+      "voice": "An incoming email can contain instructions aimed at the assistant."
+    },
+    {
+      "d": 5,
+      "kind": "gate",
+      "k": "TRUST BOUNDARY",
+      "title": "Flag suspicious mail.",
+      "sub": "Route it to human review.",
+      "voice": "Skill Y T checks for suspicious language and holds the message for review."
+    },
+    {
+      "d": 6,
+      "kind": "pipeline",
+      "k": "OFFLINE DEMO",
+      "title": "Read. Classify. Check policy.",
+      "sub": "Only eligible mail gets a draft.",
+      "voice": "Classification and fixed rules decide what gets an acknowledgment draft."
+    },
+    {
+      "d": 6,
+      "kind": "draft",
+      "k": "HUMAN CHECKPOINT",
+      "title": "The agent stops at draft.",
+      "sub": "No send operation.",
+      "voice": "People decide what happens next. The agent has no send operation."
+    },
+    {
+      "d": 5,
+      "kind": "close",
+      "k": "OPEN SOURCE",
+      "title": "Secure Inbox AI Agent",
+      "sub": "Try the synthetic demo.",
+      "voice": "Find Skill Y T on GitHub and run the offline demo."
+    }
+  ]
+}

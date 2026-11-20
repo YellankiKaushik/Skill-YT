@@ -1,0 +1,30 @@
+{
+  "name": "skill-yt-motion",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.tsx",
+    "compositions": "remotion compositions src/index.tsx",
+    "audio": "node scripts/audio.mjs",
+    "render": "node scripts/render.mjs",
+    "master": "node scripts/master.mjs",
+    "inspect": "node scripts/inspect.mjs",
+    "package-review": "node scripts/package-review.mjs",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.545",
+    "@remotion/media": "4.0.545",
+    "remotion": "4.0.545",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "@fontsource-variable/space-grotesk": "5.2.10",
+    "@fontsource/ibm-plex-mono": "5.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,35 @@
+1
+00:00:00,267 --> 00:00:02,233
+An incoming email can contain
+
+2
+00:00:02,233 --> 00:00:04,700
+instructions aimed at the assistant.
+
+3
+00:00:05,267 --> 00:00:07,700
+Skill Y T checks for suspicious language
+
+4
+00:00:07,700 --> 00:00:09,733
+and holds the message for review.
+
+5
+00:00:10,267 --> 00:00:12,867
+Classification and fixed rules decide
+
+6
+00:00:12,867 --> 00:00:15,233
+what gets an acknowledgment draft.
+
+7
+00:00:16,267 --> 00:00:18,833
+People decide what happens next.
+
+8
+00:00:18,967 --> 00:00:21,700
+The agent has no send operation.
+
+9
+00:00:22,267 --> 00:00:26,400
+Find Skill Y T on GitHub and run the offline demo.
