@@ -17,9 +17,24 @@ It is useful for developers learning to build inbox assistants, teams reviewing 
 
 ## Video walkthrough
 
-[![Secure Inbox — AI drafts, humans decide](media/production/Skill-YT-Thumbnail.webp)](docs/VIDEO_WALKTHROUGH.md)
+[![Skill-YT video preview](media/production/Skill-YT-Thumbnail.webp)](https://github.com/YellankiKaushik/Skill-YT/releases/tag/video-v1.0.0)
 
-The [video guide](docs/VIDEO_WALKTHROUGH.md) introduces the three cuts and shows how to preview or render the editable Remotion project.
+Explore Skill-YT's offline-first inbox workflow, security checks, draft preparation, duplicate protection, and human-review boundaries.
+
+### Watch the videos
+
+- [45-second cinematic trailer](https://github.com/YellankiKaushik/Skill-YT/releases/download/video-v1.0.0/Skill-YT-Trailer-1080p.mp4)
+- [5-minute animated project explainer](https://github.com/YellankiKaushik/Skill-YT/releases/download/video-v1.0.0/Skill-YT-Explainer-1080p.mp4)
+- [27-second vertical preview](https://github.com/YellankiKaushik/Skill-YT/releases/download/video-v1.0.0/Skill-YT-Vertical-1080x1920.mp4)
+
+### Source and resources
+
+- [Complete video showcase release](https://github.com/YellankiKaushik/Skill-YT/releases/tag/video-v1.0.0)
+- [Download editable source with narration](https://github.com/YellankiKaushik/Skill-YT/releases/download/video-v1.0.0/Skill-YT-Editable-Source-Sanitized.zip)
+- [Remotion project source](media/remotion/)
+- [Video reproduction guide](docs/VIDEO_WALKTHROUGH.md)
+
+These videos demonstrate synthetic offline email processing. Live Gmail was not tested, and no real email was sent.
 
 ## What is included?
 
