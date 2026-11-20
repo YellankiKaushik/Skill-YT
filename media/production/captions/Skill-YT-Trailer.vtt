@@ -1,0 +1,49 @@
+WEBVTT
+
+00:00:00.267 --> 00:00:02.733
+Your inbox receives instructions.
+
+00:00:02.867 --> 00:00:04.700
+Should an AI trust them?
+
+00:00:05.267 --> 00:00:07.700
+An email can try to override the assistant.
+
+00:00:07.800 --> 00:00:11.700
+Skill Y T flags suspicious language and routes the message to review.
+
+00:00:12.267 --> 00:00:14.933
+Skill Y T reads a synthetic inbox, classifies
+
+00:00:14.933 --> 00:00:17.067
+messages, and applies rules in code.
+
+00:00:17.167 --> 00:00:19.733
+Eligible inquiries become acknowledgment drafts.
+
+00:00:19.800 --> 00:00:21.700
+Other messages wait for review.
+
+00:00:22.267 --> 00:00:24.333
+The agent can prepare a reply.
+
+00:00:24.433 --> 00:00:26.633
+A person decides what to do with it.
+
+00:00:26.733 --> 00:00:29.733
+There is no send operation in the agent interface.
+
+00:00:30.267 --> 00:00:32.033
+The offline run created one draft.
+
+00:00:32.100 --> 00:00:35.167
+Local checks passed forty-five Python tests and twelve Node tests.
+
+00:00:35.233 --> 00:00:37.700
+The dedicated Docker job passed in GitHub Actions.
+
+00:00:38.267 --> 00:00:40.700
+Secure Inbox AI Agent.
+
+00:00:40.833 --> 00:00:44.567
+Explore the source and reproduce the demo on GitHub.

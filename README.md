@@ -15,6 +15,12 @@ It is useful for developers learning to build inbox assistants, teams reviewing 
 - [Follow the hands-on test guide](docs/TEST_IT_YOURSELF.md)
 - [Review security boundaries](#security-and-limitations)
 
+## Video walkthrough
+
+[![Secure Inbox — AI drafts, humans decide](media/production/Skill-YT-Thumbnail.webp)](docs/VIDEO_WALKTHROUGH.md)
+
+The [video guide](docs/VIDEO_WALKTHROUGH.md) introduces the three cuts and shows how to preview or render the editable Remotion project.
+
 ## What is included?
 
 | Part | What it is | Default behavior |
