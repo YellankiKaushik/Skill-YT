@@ -3,13 +3,14 @@
 import json
 import ipaddress
 import logging
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Protocol
 
 from .config import Settings
-from .models import Classification, EmailMessage, parse_classification
-from .security import deterministic_classification, has_prompt_injection
+from .models import Category, Classification, EmailMessage, parse_classification
+from .security import apply_classification_guards, deterministic_classification
 from .retry import retry_call
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ class OpenAICompatibleClassifier:
 
     def classify(self, message: EmailMessage) -> Classification:
         fallback = deterministic_classification(message)
-        if has_prompt_injection(message.body):
+        if fallback.category == Category.SUSPICIOUS:
             return fallback
         if not self.settings.openai_api_key or not self.settings.classifier_model:
             return fallback
@@ -46,7 +47,7 @@ class OpenAICompatibleClassifier:
         }
         try:
             result = _chat_completion(self.settings, payload)
-            return parse_classification(json.loads(result))
+            return apply_classification_guards(message, parse_classification(json.loads(result)))
         except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
             logger.warning("classification provider failed; using deterministic fallback")
             return fallback
@@ -58,6 +59,11 @@ def _message_data(message: EmailMessage) -> dict[str, str]:
         "subject": message.subject[:500],
         "body": message.body[:12000],
     }
+
+
+class _RejectRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        raise urllib.error.HTTPError(request.full_url, code, "provider redirect rejected", headers, None)
 
 
 def _chat_completion(settings: Settings, payload: dict) -> str:
@@ -84,10 +90,26 @@ def _chat_completion(settings: Settings, payload: dict) -> str:
         headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
         method="POST",
     )
-    def send():
-        with urllib.request.urlopen(request, timeout=settings.timeout_seconds) as response:
-            return json.loads(response.read(1_000_000))
+    opener = urllib.request.build_opener(_RejectRedirects())
 
-    data = retry_call(send, attempts=3, delay_seconds=0.2)
-    return data["choices"][0]["message"]["content"]
+    def send():
+        with opener.open(request, timeout=settings.timeout_seconds) as response:
+            raw = response.read(1_000_001)
+            if len(raw) > 1_000_000:
+                raise ValueError("provider response exceeds size limit")
+            return json.loads(raw)
+
+    data = retry_call(
+        send, attempts=3, delay_seconds=0.2,
+        retryable=lambda exc: isinstance(exc, OSError) and not (
+            isinstance(exc, urllib.error.HTTPError) and 300 <= exc.code < 400
+        ),
+    )
+    try:
+        content = data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ValueError("invalid provider response structure") from exc
+    if not isinstance(content, str):
+        raise ValueError("provider response content must be text")
+    return content
 

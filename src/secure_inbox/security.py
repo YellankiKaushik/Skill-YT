@@ -2,6 +2,7 @@
 
 import ipaddress
 import re
+from dataclasses import replace
 from urllib.parse import urlsplit
 
 from .models import Classification, Category, EmailMessage
@@ -36,7 +37,10 @@ def deterministic_classification(message: EmailMessage) -> Classification:
     ):
         return Classification(Category.SUSPICIOUS, 0.99, "security rule matched", True)
     lowered = content.lower()
-    if "sponsorship" in lowered or "brand partnership" in lowered:
+    if (
+        "sponsorship" in lowered or "brand partnership" in lowered
+        or re.search(r"\bsponsor(?:ed)?\b|\bpaid partnership\b", lowered)
+    ):
         return Classification(Category.SPONSORSHIP, 0.72, "keyword fallback", True)
     if "question" in message.subject.lower() or "could you tell me" in lowered:
         return Classification(Category.GENERAL, 0.72, "question fallback", False)
@@ -45,6 +49,18 @@ def deterministic_classification(message: EmailMessage) -> Classification:
     if "business" in lowered or "project inquiry" in lowered:
         return Classification(Category.BUSINESS, 0.66, "keyword fallback", True)
     return Classification(Category.REVIEW, 0.3, "uncertain fallback", True)
+
+
+def apply_classification_guards(message: EmailMessage, classification: Classification) -> Classification:
+    """Keep detected security and commercial rules authoritative over model output."""
+    deterministic = deterministic_classification(message)
+    if deterministic.category == Category.SUSPICIOUS:
+        return deterministic
+    if deterministic.category == Category.SPONSORSHIP and classification.category in {
+        Category.GENERAL, Category.BUSINESS,
+    }:
+        return replace(classification, category=Category.SPONSORSHIP)
+    return classification
 
 
 def extract_urls(text: str) -> list[str]:

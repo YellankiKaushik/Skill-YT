@@ -8,7 +8,7 @@ from email.utils import getaddresses
 from .classifier import _chat_completion
 from .config import Settings
 from .models import Category, Classification, Draft, EmailMessage, Policy
-from .security import has_prompt_injection, offer_below_floor
+from .security import apply_classification_guards, has_prompt_injection, offer_below_floor
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,10 @@ logger = logging.getLogger(__name__)
 def create_reply(
     message: EmailMessage, classification: Classification, policy: Policy, settings: Settings
 ) -> Draft | None:
+    classification = apply_classification_guards(message, classification)
     if not _safe_sender(message.sender) or _unsafe_header_text(message.subject):
         return None
-    if classification.category in {Category.SPAM, Category.SUSPICIOUS}:
+    if classification.requires_review or classification.category in {Category.SPAM, Category.SUSPICIOUS, Category.REVIEW}:
         return None
     if has_prompt_injection(message.body):
         return None

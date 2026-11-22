@@ -58,10 +58,15 @@ def test_loopback_provider_url_is_allowed_for_local_testing(monkeypatch):
             return None
 
         def read(self, limit):
-            assert limit == 1_000_000
+            assert limit == 1_000_001
             return b'{"choices":[{"message":{"content":"ok"}}]}'
 
-    monkeypatch.setattr("urllib.request.urlopen", lambda request, timeout: Response())
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(
+        "urllib.request.build_opener",
+        lambda *handlers: SimpleNamespace(open=lambda request, timeout: Response()),
+    )
     settings = Settings(openai_api_key="synthetic", openai_base_url="http://127.0.0.1:1234/v1")
     assert _chat_completion(settings, {}) == "ok"
 

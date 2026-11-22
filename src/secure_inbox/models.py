@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from enum import StrEnum
 import os
+import math
 from typing import Any
 
 
@@ -59,6 +60,14 @@ class Policy:
     approved_terms: str = ""
     minimum_price: float | None = None
 
+    def __post_init__(self):
+        price = self.minimum_price
+        if price is not None and (
+            isinstance(price, bool) or not isinstance(price, (int, float))
+            or not math.isfinite(price) or price < 0
+        ):
+            raise ValueError("minimum price must be a finite nonnegative number")
+
     @classmethod
     def from_env(cls) -> "Policy":
         enabled = os.getenv("SPONSORSHIP_ENABLED", "false").lower() == "true"
@@ -76,6 +85,10 @@ class Policy:
 def parse_classification(payload: Any) -> Classification:
     if not isinstance(payload, dict):
         raise ValueError("classification response must be an object")
+    if not isinstance(payload.get("confidence"), (int, float)) or isinstance(payload["confidence"], bool):
+        raise ValueError("classification confidence must be numeric")
+    if not isinstance(payload.get("requires_review"), bool):
+        raise ValueError("classification requires_review must be a boolean")
     try:
         category = Category(payload["category"])
         confidence = float(payload["confidence"])
