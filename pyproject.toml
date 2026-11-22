@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secure-inbox-agent"
-version = "1.1.0"
+version = "1.1.1"
 description = "Draft-only Gmail inbox assistant with explicit security boundaries"
 requires-python = ">=3.11"
 dependencies = []

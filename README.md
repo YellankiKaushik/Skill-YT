@@ -2,6 +2,8 @@
 
 **An offline-first reference implementation for safer inbox workflows, with human-reviewed drafts and a reusable Codex skill.**
 
+Skill-YT is YellankiKaushik's independently maintained MIT-licensed project. The reusable skill provides guidance for Codex projects. The Python inbox application is a separate reference implementation.
+
 This project helps developers explore how to classify inbox messages, apply fixed business rules, and prepare replies without giving an AI agent a send-mail capability. The default demo uses synthetic messages and makes no Gmail, Docker, or AI-provider connection.
 
 It is useful for developers learning to build inbox assistants, teams reviewing business or sponsorship inquiries, and Codex users who want reusable guidance for building or auditing inbox-agent code. It is a security-focused reference project, not a production-ready autonomous mailbox service.
@@ -169,6 +171,30 @@ See the [example README](examples/skill-acceptance-test/README.md) and [test sou
 
 A Codex Agent Skill is a folder of instructions Codex can load for relevant work. The <code>SKILL.md</code> file defines the skill name, when to use it, and its workflow. The references cover [security](.agents/skills/secure-inbox-agent/references/security.md), [Gmail state and recovery](.agents/skills/secure-inbox-agent/references/gmail-workflow.md), and [adversarial tests](.agents/skills/secure-inbox-agent/references/testing.md).
 
+### Install the standalone archive
+
+The corrected v1.1.1 archive is `secure-inbox-agent-v1.1.1.zip`. It includes the complete MIT notice inside the skill directory. The earlier `v1.1.0` standalone archive omits that notice. When published, download the v1.1.1 ZIP and its checksum from the [releases page](https://github.com/YellankiKaushik/Skill-YT/releases).
+
+Once you have the ZIP, verify its SHA-256 against the accompanying checksum, then extract it and place its complete `secure-inbox-agent` directory in the target project's `.agents/skills/`. This instruction-only installation requires a supported Codex session. It needs no Python runtime, Gmail sign-in, maintainer files, or GitHub credentials for a public download. Preserve the included `LICENSE` when copying or redistributing it.
+
+These PowerShell commands install a downloaded copy into a project and reject an existing installation.
+
+~~~powershell
+$ErrorActionPreference = 'Stop'
+$archive = Join-Path $env:USERPROFILE 'Downloads\secure-inbox-agent-v1.1.1.zip'
+$project = 'C:\Projects\my-app'
+$target = Join-Path $project '.agents\skills\secure-inbox-agent'
+if (Test-Path -LiteralPath $target) { throw 'A secure-inbox-agent installation already exists.' }
+$staging = Join-Path $env:TEMP ('skill-yt-extract-' + [guid]::NewGuid().ToString('N'))
+Expand-Archive -LiteralPath $archive -DestinationPath $staging
+[IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
+Copy-Item -LiteralPath (Join-Path $staging 'secure-inbox-agent') -Destination $target -Recurse
+~~~
+
+Open the target project in Codex and select `$secure-inbox-agent`. Compare the ZIP's SHA-256 with the supplied manifest using `Get-FileHash -Algorithm SHA256 -LiteralPath $archive`. On macOS/Linux, extract the same directory into `.agents/skills/` and preserve an existing installation. Actual skill invocation requires model access in the consumer's own Codex session.
+
+### Install from a source checkout
+
 From the repository root, preview and install for your user across projects:
 
 ~~~powershell
@@ -203,6 +229,12 @@ the relevant tests. Cite concrete files and findings.
 
 Skill discovery means Codex can see the skill; it does not prove a model-backed task ran. Verify an invocation by running a task in the target project, reviewing the resulting changes, and rerunning its tests. A working account-supported Codex model session is required. See [official Codex skills documentation](https://developers.openai.com/codex/skills/).
 
+### Reproduce the release archive
+
+From a source checkout, use Python 3.11+ to run `python scripts/package_skill.py --output ../secure-inbox-agent-v1.1.1.zip`. The builder uses a fixed file order and ZIP metadata, includes six files with the root MIT notice, prints SHA-256, and refuses to overwrite an output. Use the same checkout bytes and Python/zlib version to reproduce the same digest. Dependencies, application source and media are excluded.
+
+An explicit in-app invocation read the actual project-scoped skill and references and completed a draft-only security audit. This is manual activation evidence. Automated CLI activation remains unverified because Windows denied app-server startup before a model turn; implicit invocation and unrelated-task nonactivation were not verified. Installation and discovery alone do not establish model-backed activation.
+
 ## Hands-on guide and CI
 
 The [hands-on test guide](docs/TEST_IT_YOURSELF.md) covers a clean clone, Python checks, the Node example, project-local skill installation, and actual model-backed invocation evidence.
@@ -221,9 +253,12 @@ See the [CI workflow](.github/workflows/ci.yml) and [latest workflow runs](https
 
 - Email body, sender, subject, attachments, and quoted content are untrusted data, not policy instructions. Deterministic checks and human review are defense in depth, not perfect prompt-injection protection.
 - The application exposes draft creation but no send operation. A human must inspect any live draft before deciding what to do with it.
+- Optional AI-provider use transmits selected sender, subject and body text, plus approved commercial terms and the configured price floor for drafting, to the configured endpoint. Provider requests reject HTTP redirects. Generated text still needs human inspection for factual errors, sensitive content and unauthorized commitments.
+- Detected suspicious content in sender, subject or body takes priority over provider classifications. Detected sponsorship messages retain commercial policy checks after reclassification. Keyword checks have limited coverage, and the price matcher recognizes dollar/USD amounts.
 - Gmail is optional and disabled by default. Live CLI use requires <code>--live</code> and one explicit <code>--message-id</code>; it does not poll or process an entire mailbox.
 - Gmail OAuth permissions can be broader than the application's interface. Google lists <code>gmail.compose</code> and <code>gmail.modify</code> as restricted scopes, and they can authorize sending. Review the [official scope table](https://developers.google.com/workspace/gmail/api/auth/scopes) before connecting an account.
 - Recovery targets one worker; it is not distributed locking or exactly-once delivery.
+- If processing or state persistence fails, the outcome is `failed`; a draft may already exist. Restart recovery uses its marker when Gmail exposes it. Repeated API errors can require operator review.
 - Docker HTML inspection examines only a supplied snapshot. It has no network and does not fetch links or visit URLs.
 - Never commit OAuth client files, tokens, API keys, mailbox data, or <code>.env</code> secrets.
 
@@ -237,6 +272,8 @@ See the detailed [security documentation](docs/SECURITY.md).
 | External AI model | Optional OpenAI-compatible provider; no live model request is verified. Deterministic fallback is available. | No |
 | Docker Desktop | Optional for local HTML inspection. The Docker integration runs in GitHub Actions. | No |
 | Plurai | Optional research; no integration or simulation is configured. | No |
+
+The optional live Gmail workflow requires further validation before production use. Offline tests provide evidence for synthetic and mocked behavior only.
 
 ## Troubleshooting
 

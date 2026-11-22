@@ -6,8 +6,7 @@ from .drafting import create_reply
 from .models import Category, EmailMessage, Policy, WorkflowState
 from .security import (
     DraftOnlyBoundary,
-    deterministic_classification,
-    has_prompt_injection,
+    apply_classification_guards,
     offer_below_floor,
 )
 
@@ -37,9 +36,7 @@ class InboxAgent:
             self.state.processed.add(message.id)
             try:
                 self._transition(message.id, WorkflowState.PROCESSING)
-                classification = self.classifier.classify(message)
-                if has_prompt_injection(message.body):
-                    classification = deterministic_classification(message)
+                classification = apply_classification_guards(message, self.classifier.classify(message))
                 if classification.category == Category.SPONSORSHIP and (
                     not self.policy.sponsorship_enabled
                     or not self.policy.approved_terms.strip()
@@ -69,7 +66,13 @@ class InboxAgent:
             except Exception as exc:
                 logger.warning("message processing failed (%s); message content omitted", type(exc).__name__)
                 self.state.processed.discard(message.id)
-                self._transition(message.id, WorkflowState.FAILED)
+                try:
+                    self._transition(message.id, WorkflowState.FAILED)
+                except Exception as transition_error:
+                    logger.warning(
+                        "failure state could not be persisted (%s); message content omitted",
+                        type(transition_error).__name__,
+                    )
                 outcomes.append((message.id, "failed"))
         return outcomes
 
